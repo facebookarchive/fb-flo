@@ -3,8 +3,23 @@ var flo = require('../');
 var assert = require('assert');
 var WebSocketClient = require('websocket').client;
 
+function client(connectFailed, connect, message) {
+  var client = new WebSocketClient();
+  client.connect('ws://localhost:8888/');
+  client.on('connectFailed', connectFailed);
+  client.on('connect', function (connection) {
+    if (connect) connect(connection);
+    connection.on('message', function (msg) {
+      var data = msg.utf8Data;
+      data = JSON.parse(data);
+      if (message) message(data);
+    });
+  });
+  return client;
+}
+
 describe('flo(dir)', function() {
-  var client, f;
+  var f;
 
   beforeEach(function() {
     try {
@@ -24,31 +39,28 @@ describe('flo(dir)', function() {
     f = flo('/tmp/flo_test');
     f.on('added', console.log)
     f.on('ready', function () {
-      client = new WebSocketClient();
-      client.connect('ws://localhost:8888/');
-      client.on('connect', done.bind(null, null));
-      client.on('connectFailed', done.bind(null, new Error('Failed to connect')));
+      var c = client(
+        done.bind(null, new Error('Failed to connect')),
+        done.bind(null, null)
+      );
     });
   });
 
   it('should send resource to the client when changed', function(done) {
     f = flo('/tmp/flo_test');
     f.on('ready', function () {
-      client = new WebSocketClient();
-      client.connect('ws://localhost:8888/');
-      client.on('connectFailed', done.bind(null, new Error('Failed to connect')));
-      client.on('connect', function (connection) {
-        connection.on('message', function(msg) {
-          var data = msg.utf8Data;
-          var msg = JSON.parse(data);
+      var c = client(
+        done.bind(null, new Error('Failed to connect')),
+        null,
+        function (msg) {
           assert.deepEqual(msg, {
             contents: 'alert("hi")',
             resourceURL: 'foo.js',
             match: 'indexOf'
           });
           done();
-        });
-      });
+        }
+      );
       fs.writeFileSync('/tmp/flo_test/foo.js', 'alert("hi")');
     });
   });
@@ -57,21 +69,18 @@ describe('flo(dir)', function() {
     fs.writeFileSync('/tmp/flo_test/bar.css', 'bar {color: red}');
     f = flo('/tmp/flo_test');
     f.on('ready', function () {
-      client = new WebSocketClient();
-      client.connect('ws://localhost:8888/');
-      client.on('connectFailed', done.bind(null, new Error('Failed to connect')));
-      client.on('connect', function (connection) {
-        connection.on('message', function(msg) {
-          var data = msg.utf8Data;
-          var msg = JSON.parse(data);
+      var c = client(
+        done.bind(null, new Error('Failed to connect')),
+        null,
+        function(msg) {
           assert.deepEqual(msg, {
             contents: 'bar {color: blue}',
             resourceURL: 'bar.css',
             match: 'indexOf'
           });
           done();
-        });
-      });
+        }
+      );
       fs.writeFileSync('/tmp/flo_test/bar.css', 'bar {color: blue}');
     });
   });
@@ -79,13 +88,6 @@ describe('flo(dir)', function() {
   it('should send resource to multiple clients when changed', function(done) {
     f = flo('/tmp/flo_test');
     f.on('ready', function () {
-      client = new WebSocketClient();
-      var client2 = new WebSocketClient();
-      client2.connect('ws://localhost:8888/');
-      client.connect('ws://localhost:8888/');
-      client.on('connectFailed', done.bind(null, new Error('Failed to connect')));
-      client2.on('connectFailed', done.bind(null, new Error('Failed to connect')));
-
       var i = 0;
       function handler(connection) {
         connection.on('message', function(msg) {
@@ -104,15 +106,23 @@ describe('flo(dir)', function() {
           }
         });
       }
-      client.on('connect', handler);
-      client2.on('connect', handler);
+
+      var c1 = client(
+        done.bind(null, new Error('Failed to connect')),
+        handler
+      );
+      var c2 = client(
+        done.bind(null, new Error('Failed to connect')),
+        handler
+      );
+
       fs.writeFileSync('/tmp/flo_test/foo.js', 'alert("hi")');
     });
   });
 });
 
  describe('flo(dir, resolver)', function() {
-  var client, f;
+  var f;
 
   beforeEach(function() {
     try {
@@ -138,20 +148,19 @@ describe('flo(dir)', function() {
     });
 
     f.on('ready', function() {
-      client = new WebSocketClient();
-      client.connect('ws://localhost:8888/');
-      client.on('connect', function(connection) {
-        connection.on('message', function(msg) {
-          var data = msg.utf8Data;
-          var msg = JSON.parse(data);
+      var c = client(
+        done.bind(null, new Error('Failed to connect')),
+        null,
+        function(msg) {
           assert.deepEqual(msg, {
             contents: 'foobar',
             resourceURL: 'customurl',
             match: 'indexOf'
           });
           done();
-        });
-      });
+        }
+      );
+
       fs.writeFileSync('/tmp/flo_test/foo.js', 'hmmmm');
     });
   });
@@ -168,12 +177,10 @@ describe('flo(dir)', function() {
       });
 
       f.on('ready', function() {
-        client = new WebSocketClient();
-        client.connect('ws://localhost:8888/');
-        client.on('connect', function(connection) {
-          connection.on('message', function(msg) {
-            var data = msg.utf8Data;
-            var msg = JSON.parse(data);
+        var c = client(
+          done.bind(null, new Error('Failed to connect')),
+          null,
+          function(msg) {
             assert.deepEqual(msg, {
               contents: 'foobar',
               resourceURL: 'customurl',
@@ -183,8 +190,9 @@ describe('flo(dir)', function() {
               }
             });
             done();
-          });
-        });
+          }
+        );
+
         fs.writeFileSync('/tmp/flo_test/foo.js', 'hmmmm');
       });
     });
@@ -200,12 +208,10 @@ describe('flo(dir)', function() {
       });
 
       f.on('ready', function() {
-        client = new WebSocketClient();
-        client.connect('ws://localhost:8888/');
-        client.on('connect', function(connection) {
-          connection.on('message', function(msg) {
-            var data = msg.utf8Data;
-            var msg = JSON.parse(data);
+        var c = client(
+          done.bind(null, new Error('Failed to connect')),
+          null,
+          function(msg) {
             assert.deepEqual(msg, {
               contents: 'foobar',
               resourceURL: 'customurl',
@@ -218,8 +224,9 @@ describe('flo(dir)', function() {
               }
             });
             done();
-          });
-        });
+          }
+        );
+
         fs.writeFileSync('/tmp/flo_test/foo.js', 'hmmmm');
       });
     });
