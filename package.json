@@ -1,0 +1,18 @@
+{
+  "name": "flo",
+  "version": "0.0.0",
+  "description": "Static resource hot swapping for Chrome",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "websocket": "~1.0.8",
+    "gaze": "~0.5.0"
+  },
+  "devDependencies": {
+    "mocha": "~1.17.1"
+  }
+}
