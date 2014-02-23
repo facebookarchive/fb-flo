@@ -145,7 +145,7 @@ this.Session = (function () {
   };
 
   function indexOfMatcher(val, resourceURL) {
-    return resourceURL.indexOf(val) > -1;
+    return val.indexOf(resourceURL) > -1;
   }
 
   function equalMatcher(val, resourceURL) {
@@ -204,7 +204,7 @@ this.Session = (function () {
         console.error(status);
         logger.logInContext(
           'flo failed to update, please report the following to amasad@fb.com' +
-            JSON.strigify(status),
+            JSON.stringify(status),
           'error'
         );
       }
