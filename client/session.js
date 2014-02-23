@@ -144,27 +144,60 @@ this.Session = (function () {
     );
   };
 
+  function indexOfMatcher(val, resourceURL) {
+    return resourceURL.indexOf(val) > -1;
+  }
+
+  function equalMatcher(val, resourceURL) {
+    return resourceURL === val;
+  }
+
   /**
    * Handler for messages from the server.
    * @arg {object} msg
    */
-  Session.prototype._onMessage = function(msg) {
-    var updatedResource = {
-      package: msg.package,
-      code: msg.code
-    };
+  Session.prototype._onMessage = function(updatedResource) {
+    log('Requested resource update', updatedResource.resourceURL);
 
-    log('Requested resource update', msg.package);
+    var match = updatedResource.match;
+    var matcher;
+
+    if (typeof match === 'string') {
+      if (match === 'indexOf') {
+        matcher = indexOfMatcher;
+      } else if (match === 'equal') {
+        matcher = equalMatcher;
+      } else {
+        throw new Error('Unknown match string option ' + match);
+      }
+    } else if (match && typeof match === 'object') {
+      if (match.type === 'regexp') {
+        var flags = '';
+        if (match.ignoreCase) {
+          flags += 'i';
+        }
+        if (match.multiline) {
+          flags += 'm';
+        }
+        if (match.global) {
+          flags += 'g';
+        }
+        var r = new RegExp(match.source, flags);
+        matcher = r.exec.bind(r);
+      } else {
+        throw new Error('Unknown match object option');
+      }
+    }
 
     var resource = this.resources.filter(function (res) {
-      return res.url.indexOf(updatedResource.package) > -1;
+      return matcher(res.url, updatedResource.resourceURL);
     })[0];
 
     if (!resource) {
-      throw new Error('Resource not found: ' + updatedResource.package);
+      throw new Error('Resource not found: ' + updatedResource.resourceURL);
     }
 
-    resource.setContent(updatedResource.code, true, function (status) {
+    resource.setContent(updatedResource.contents, true, function (status) {
       if (status.code === 'OK') {
         log('Resource update successful', status);
       } else {

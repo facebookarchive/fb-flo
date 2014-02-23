@@ -166,38 +166,7 @@ describe('flo(dir)', function() {
   });
 
   describe('resolver match property', function() {
-    it('should work with a custom resolver', function(done) {
-      f = flo('/tmp/flo_test', function (filepath, callback) {
-        assert.equal(filepath, 'foo.js');
-        callback({
-          contents: 'foobar',
-          resourceURL: 'customurl',
-          match: function (a, b) {return a == b;}
-        });
-      });
-
-      f.on('ready', function() {
-        var c = client(
-          done.bind(null, new Error('Failed to connect')),
-          null,
-          function(msg) {
-            assert.deepEqual(msg, {
-              contents: 'foobar',
-              resourceURL: 'customurl',
-              match: {
-                type: 'function',
-                source: 'function (a, b) {return a == b;}'
-              }
-            });
-            done();
-          }
-        );
-
-        fs.writeFileSync('/tmp/flo_test/foo.js', 'hmmmm');
-      });
-    });
-
-    it('should work with a custom resolver', function(done) {
+    it('should serialize regexp objects', function(done) {
       f = flo('/tmp/flo_test', function (filepath, callback) {
         assert.equal(filepath, 'foo.js');
         callback({
