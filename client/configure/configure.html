@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+<title>flo configuration</title>
+<link rel="stylesheet" href="normalize.css" />
+<style>
+  body {
+    font-family: helvetica,arial,sans-serif;
+    font-size: 13px;
+    color: rgb(48, 57, 66);
+    font-family: 'Lucida Grande', sans-serif;
+  }
+  main {
+    width: 320px;
+    margin: 16px;
+  }
+  form {
+    padding-left: 50px;
+  }
+  section.labels {
+    float: left;
+    padding-right: 16px;
+  }
+  .hostnames-label-container {
+    height: 100px;
+  }
+  .hostnames-container {
+    position: relative;
+    height: 100px;
+  }
+  .list-control {
+    position: absolute;
+    top: 0;
+    right: -45px;
+  }
+  .list-control button {
+    width: 25px;
+  }
+  input[name="port"], select {
+    border: 1px solid gray;
+    width: 150px;
+  }
+  h3 {
+    color: rgb(110, 116, 128);
+    font-size: 18px;
+    line-height: 20px;
+    font-weight: normal;
+    margin-top: 0;
+  }
+</style>
+</head>
+<body>
+  <main>
+    <h3>flo configuration</h3>
+    <form>
+      <section class="labels">
+        <div class="hostnames-label-container">
+          <label for="hostnames">Hostnames:</label>
+        </div>
+        <div>
+          <label for="port">Port number:</label>
+        </div>
+      </section>
+
+      <section>
+        <div class="hostnames-container">
+          <select name="hostnames" class="hostnames" multiple>
+          </select>
+          <div class="list-control">
+            <button class="add">+</button>
+            <button class="remove">-</button>
+          </div>
+        </div>
+        <div>
+         <input name="port" />
+        </div>
+      </section>
+    </form>
+
+  </main>
+  <script src="configure.js"></script>
+</body>
+</html>
