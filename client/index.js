@@ -17,7 +17,7 @@
     try {
       var conf = JSON.parse(localStorage.getItem('flo-config'));
       if (!conf) return;
-      confing = conf;
+      config = conf;
       config.hostnames = config.hostnames.map(function(pattern) {
         var m = pattern.match(/^\/(.+)\/([gim]{0,3})$/);
         if (m && m[1]) {
