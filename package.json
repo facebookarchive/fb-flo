@@ -4,7 +4,7 @@
   "description": "Static resource hot swapping for Chrome",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/mocha/bin/mocha --bail"
   },
   "author": "",
   "license": "BSD-2-Clause",
@@ -14,5 +14,6 @@
   },
   "devDependencies": {
     "mocha": "~1.17.1"
-  }
+  },
+  "bin": "./bin/flo"
 }

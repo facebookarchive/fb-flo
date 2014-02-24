@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+var flo = require('../');
+var path = require('path');
+
+var file = path.join(
+  process.cwd(),
+  process.argv[2] || 'flofile.js'
+);
+
+var config;
+try {
+  config = require(file);
+} catch (e) {
+  config = {};
+}
+
+config.options = config.options || {};
+
+var f = flo(
+  config.options.dir || process.cwd(),
+  config.options,
+  config.resolver
+);
+
+f.once('ready', config.ready || function() {});
