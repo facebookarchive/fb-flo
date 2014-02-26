@@ -25,7 +25,6 @@ this.Connection = (function() {
     ws.onopen = function () {
       log('Connected');
       (this._openCallback || NOP)();
-      ws.send(this.host);
       this._retries = RETRIES;
     }.bind(this);
     ws.onmessage = this._onMessage.bind(this);
