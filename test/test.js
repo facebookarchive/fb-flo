@@ -21,7 +21,7 @@ function client(connectFailed, connect, message) {
 describe('flo(dir)', function() {
   var f;
 
-  beforeEach(function() {
+  beforeEach(function(done) {
     try {
       fs.mkdirSync('/tmp/flo_test');
     } catch (e) {
@@ -29,6 +29,7 @@ describe('flo(dir)', function() {
     }
 
     fs.writeFileSync('/tmp/flo_test/foo.js', 'alert("wow")');
+    setTimeout(done, 300);
   });
 
   afterEach(function() {

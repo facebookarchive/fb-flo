@@ -10,7 +10,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "websocket": "~1.0.8",
-    "chokidar": "git://github.com/amasad/chokidar.git"
+    "sane": "~0.2.1"
   },
   "devDependencies": {
     "mocha": "~1.17.1"
