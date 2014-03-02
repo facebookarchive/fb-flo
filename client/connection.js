@@ -2,16 +2,15 @@
 
 this.Connection = (function() {
   'use strict';
-
-  var log = logger('connection');
   var NOP = function () {};
   var DELAY = 500;
   var RETRIES = 5;
 
-  function Connection(host, port) {
+  function Connection(host, port, logger) {
     this._retries = RETRIES;
     this.host = host;
     this.port = port;
+    this.log = logger('connection');
   }
 
   /**
@@ -20,12 +19,13 @@ this.Connection = (function() {
    * @returns {Connection} this
    */
   Connection.prototype.connect = function() {
-    var ws = new WebSocket('ws://' + this.host + ':' + this.port + '/');
+    var url = 'ws://' + this.host + ':' + this.port + '/';
+    var ws = new WebSocket(url);
     (this._connectingCallback || NOP)();
-    log('Connecting ...', ws);
+    this.log('Connecting to', url);
 
     ws.onopen = function () {
-      log('Connected');
+      this.log('Connected');
       (this._openCallback || NOP)();
       this._retries = RETRIES;
     }.bind(this);
@@ -41,13 +41,13 @@ this.Connection = (function() {
    * @arg {object} evt The event that caused the retry.
    */
   Connection.prototype._retry = function(evt) {
-    log('Failed to connect with %s %s', evt.reason, evt.code);
+    this.log('Failed to connect with', evt.reason, evt.code);
     if (--this._retries < 1) {
       var err = new Error(evt.reason || 'Error connecting.');
       (this._errCallback || NOP)(err);
     } else {
       var delay = (RETRIES - this._retries) * DELAY;
-      log('Reconnecting in ', delay);
+      this.log('Reconnecting in ', delay);
       (this._retryCallback || NOP)(delay);
       setTimeout(function () {
         this.connect();
@@ -148,7 +148,7 @@ this.Connection = (function() {
    */
   Connection.prototype._onMessage = function(evt) {
     var msg = JSON.parse(evt.data);
-    log('Message', msg);
+    this.log('Message', msg);
     (this._msgCallback || NOP)(msg);
   };
 

@@ -77,6 +77,12 @@
     return option;
   }
 
+  function createLogItem(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div;
+  }
+
   /**
    * Event handlers.
    */
@@ -134,4 +140,12 @@
     load(e.data);
   });
 
+  listenToEvent('log', function(e) {
+    var item = createLogItem(
+      e.data.map(function(a) {
+        return a.toString()
+      }).join(' ')
+    );
+    $('.log-box').appendChild(item);
+  });
 })();

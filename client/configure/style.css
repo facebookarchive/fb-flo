@@ -293,4 +293,5 @@ input[name="port"] {
   margin: 0;
   display: inline-block;
   overflow-y: scroll;
+  margin-bottom: 15px;
 }

@@ -4,16 +4,15 @@
 (function() {
   'use strict';
 
-  var log = logger('index');
-
   function FloClient() {
-    log('booting');
     this.loadConfig();
     this.session = null;
     this.panelWindow = null;
     this.panelEventBuffer = [];
     this.status = this.status.bind(this);
     this.startNewSession = this.startNewSession.bind(this);
+    this.logger = Logger(this.triggerEvent.bind(this, 'log'));
+    this.log = this.logger('flo');
     this.createPanel();
     this.start();
   }
@@ -139,7 +138,12 @@
     this.getLocation(
       function (host) {
         if (this.matchHost(host)) {
-          this.session = new Session(host, this.config.port, this.status);
+          this.session = new Session(
+            host,
+            this.config.port,
+            this.status,
+            this.logger
+          );
           this.session.start();
         } else {
           this.status('disabled');

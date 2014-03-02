@@ -3,12 +3,12 @@
 this.Session = (function () {
   'use strict';
 
-  var log = logger('session');
-
-  function Session(host, port, status) {
+  function Session(host, port, status, logger) {
     this.host = host;
     this.port = port;
     this.status = status;
+    this.logger = logger;
+    this.log = logger('session');
     this.resources = null;
     this.conn = null;
     this.listeners = {};
@@ -19,7 +19,7 @@ this.Session = (function () {
    * @api
    */
   Session.prototype.start = function() {
-    log('Starting flo for host', this.host);
+    this.log('Starting flo for host', this.host);
     this._getResources(this._connect.bind(this, this._started.bind(this)));
   };
 
@@ -28,7 +28,7 @@ this.Session = (function () {
    * @api
    */
   Session.prototype.restart = function() {
-    log('Restarting');
+    this.log('Restarting');
     this._removeEventListeners();
     if (this.conn.connected()) {
       logger.logInContext('flo running.');
@@ -110,21 +110,13 @@ this.Session = (function () {
   Session.prototype._connect = function(callback) {
     callback = once(callback);
     var self = this;
-    this.conn = new Connection(this.host, this.port)
+    this.conn = new Connection(this.host, this.port, this.logger)
       .message(this._onMessage.bind(this))
       .error(function (err) {
-        logger.logInContext(
-          'flo error: ' + err.message,
-          'error'
-        );
         callback();
         self.status('error');
       })
       .open(function () {
-        logger.logInContext(
-          'flo started',
-          'debug'
-        );
         callback();
         self.status('connected');
       })
@@ -135,11 +127,6 @@ this.Session = (function () {
         self.status('connecting');
       })
       .connect();
-
-      logger.logInContext(
-        'flo starting, connecting to host ' + self.host,
-        'debug'
-      );
   };
 
   /**
@@ -168,7 +155,7 @@ this.Session = (function () {
    * @arg {object} msg
    */
   Session.prototype._onMessage = function(updatedResource) {
-    log('Requested resource update', updatedResource.resourceURL);
+    this.log('Requested resource update', updatedResource.resourceURL);
 
     var match = updatedResource.match;
     var matcher;
@@ -210,20 +197,17 @@ this.Session = (function () {
 
     resource.setContent(updatedResource.contents, true, function (status) {
       if (status.code === 'OK') {
-        log('Resource update successful', status);
+        this.log('Resource update successful');
       } else {
-        console.error(status);
-        logger.logInContext(
+        this.log(
           'flo failed to update, please report the following to amasad@fb.com' +
-            JSON.stringify(status),
-          'error'
+            JSON.stringify(status)
         );
       }
-    });
+    }.bind(this));
   };
 
   Session.prototype.destroy = function() {
-    log('destroying');
     this._removeEventListeners();
     this.conn && this.conn.disconnect();
   };

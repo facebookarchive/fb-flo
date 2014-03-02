@@ -1,17 +1,19 @@
 /* jshint evil:true */
 
-this.logger = (function() {
+this.Logger = (function() {
   'use strict';
 
-  function logger(namespace) {
-    return function() {
-      var args = [].slice.call(arguments);
-      args[0] = '[flo][' + namespace + ']' + args[0];
-      return console.log.apply(console, args);
+  function Logger(log) {
+    return function(namespace) {
+      return function() {
+        var args = [].slice.call(arguments);
+        args[0] = '[' + namespace + '] ' + args[0];
+        return log(args);
+      }
     };
   }
 
-  logger.logInContext = function(arg, method) {
+  Logger.logInContext = function(arg, method) {
     if (!method) {
       method = 'log';
     }
@@ -20,5 +22,5 @@ this.logger = (function() {
     );
   };
 
-  return logger;
+  return Logger;
 })();
