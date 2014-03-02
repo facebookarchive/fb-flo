@@ -18,6 +18,10 @@
     return event;
   };
 
+  function listenToEvent(type, callback) {
+    window.addEventListener('flo_' + type, callback);
+  }
+
   /**
    * Navigation.
    */
@@ -42,26 +46,17 @@
       return el.textContent.trim();
     });
     var port = $('input[name="port"').value.trim();
-    localStorage.setItem('flo-config', JSON.stringify({
+    triggerEvent('config_changed',{
       port: port,
       hostnames: hostnames
-    }));
-    triggerEvent('config_changed');
+    });
   }
 
-  function load() {
-    var config;
-    try {
-      config = JSON.parse(localStorage.getItem('flo-config'));
-    } catch (e) {
-      return;
-    }
-    var hostnames = config.hostnames || [];
-    var port = config.port || 8888;
-    hostnames.forEach(function(host) {
+  function load(config) {
+    config.hostnames.forEach(function(host) {
       $('.hostnames').appendChild(createHostnameOption(host));
     });
-    $('input[name="port"').value = port;
+    $('input[name="port"').value = config.port;
   }
 
   /**
@@ -111,7 +106,7 @@
   $('form').onchange = save;
 
   var prevStatus = 'disabled';
-  window.addEventListener('flo_status_change', function(e) {
+  listenToEvent('status_change', function(e) {
     var data = e.data;
     var indicator = $('.status .indicator')
     indicator.classList.remove(prevStatus);
@@ -134,5 +129,8 @@
     triggerEvent('enable_for_host');
   };
 
-  load();
+  listenToEvent('load', function(e) {
+    load(e.data);
+  });
+
 })();

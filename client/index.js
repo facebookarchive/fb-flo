@@ -44,7 +44,10 @@
     this.config =  config;
   };
 
-  FloClient.prototype.saveConfig = function() {
+  FloClient.prototype.saveConfig = function(config) {
+    if (config) {
+      this.config = config;
+    }
     localStorage.setItem('flo-config', JSON.stringify(this.config));
   };
 
@@ -82,8 +85,8 @@
   };
 
   FloClient.prototype.bindPanelEvents = function() {
-    this.listenToPanel('config_changed', function() {
-      this.loadConfig();
+    this.listenToPanel('config_changed', function(e) {
+      this.saveConfig(e.data);
       this.startNewSession();
     });
     this.listenToPanel('retry', this.startNewSession);
@@ -92,6 +95,7 @@
       this.panelWindow.dispatchEvent(event);
     }, this);
     this.panelEventBuffer = [];
+    this.triggerEvent('load', this.config);
   };
 
   FloClient.prototype.start = function() {
