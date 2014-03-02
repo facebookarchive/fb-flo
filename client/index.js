@@ -111,7 +111,7 @@
 
   FloClient.prototype.getLocation = function(callback) {
     chrome.devtools.inspectedWindow['eval'](
-      '({ host: location.hostname, href: location.href })',
+      'location.hostname',
       callback.bind(this)
     );
   };
@@ -137,9 +137,9 @@
     }
 
     this.getLocation(
-      function (result) {
-        if (this.matchHost(result.host)) {
-          this.session = new Session(result, this.config.port, this.status);
+      function (host) {
+        if (this.matchHost(host)) {
+          this.session = new Session(host, this.config.port, this.status);
           this.session.start();
         } else {
           this.status('disabled');
@@ -149,10 +149,10 @@
   };
 
   FloClient.prototype.enableForHost = function() {
-    this.getLocation(function(result) {
+    this.getLocation(function(host) {
       console.log(arguments);
-      if (!this.matchHost(result.host)) {
-        this.config.hostnames.push(result.host);
+      if (!this.matchHost(host)) {
+        this.config.hostnames.push(host);
         this.saveConfig();
         this.startNewSession();
       }

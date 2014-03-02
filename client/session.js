@@ -5,8 +5,8 @@ this.Session = (function () {
 
   var log = logger('session');
 
-  function Session(loc, port, status) {
-    this.loc = loc;
+  function Session(host, port, status) {
+    this.host = host;
     this.port = port;
     this.status = status;
     this.resources = null;
@@ -19,7 +19,7 @@ this.Session = (function () {
    * @api
    */
   Session.prototype.start = function() {
-    log('Starting flo for host', this.loc.host);
+    log('Starting flo for host', this.host);
     this._getResources(this._connect.bind(this, this._started.bind(this)));
   };
 
@@ -110,7 +110,7 @@ this.Session = (function () {
   Session.prototype._connect = function(callback) {
     callback = once(callback);
     var self = this;
-    this.conn = new Connection(this.loc.host, this.port)
+    this.conn = new Connection(this.host, this.port)
       .message(this._onMessage.bind(this))
       .error(function (err) {
         logger.logInContext(
@@ -137,7 +137,7 @@ this.Session = (function () {
       .connect();
 
       logger.logInContext(
-        'flo starting, connecting to host ' + self.loc.host,
+        'flo starting, connecting to host ' + self.host,
         'debug'
       );
   };
