@@ -3,80 +3,47 @@
 <head>
 <title>flo configuration</title>
 <link rel="stylesheet" href="normalize.css" />
-<style>
-  body {
-    font-family: helvetica,arial,sans-serif;
-    font-size: 13px;
-    color: rgb(48, 57, 66);
-    font-family: 'Lucida Grande', sans-serif;
-  }
-  main {
-    width: 320px;
-    margin: 16px;
-  }
-  form {
-    padding-left: 50px;
-  }
-  section.labels {
-    float: left;
-    padding-right: 16px;
-  }
-  .hostnames-label-container {
-    height: 100px;
-  }
-  .hostnames-container {
-    position: relative;
-    height: 100px;
-  }
-  .list-control {
-    position: absolute;
-    top: 0;
-    right: -45px;
-  }
-  .list-control button {
-    width: 25px;
-  }
-  input[name="port"], select {
-    border: 1px solid gray;
-    width: 150px;
-  }
-  h3 {
-    color: rgb(110, 116, 128);
-    font-size: 18px;
-    line-height: 20px;
-    font-weight: normal;
-    margin-top: 0;
-  }
-</style>
 </head>
 <body>
   <main>
-    <h3>flo configuration</h3>
-    <form>
-      <section class="labels">
-        <div class="hostnames-label-container">
-          <label for="hostnames">Hostnames:</label>
-        </div>
-        <div>
-          <label for="port">Port number:</label>
-        </div>
-      </section>
+    <nav>
+      <ol>
+        <li data-tab="status-log" class="selected">Status &amp; Log</li>
+        <li data-tab="config">Configuration</li>
+      </ol>
+    </nav>
+    <section class="status-log tab selected">
+      <h1>Status</h1>
+      <div class="status">
+        <span class="indicator"></span>
+        <span class="text">disabled</span>
+        <button class="enable">Activate for this site</button>
+      </div>
+      <h1>Log</h1>
+      <div class="log-box">
 
-      <section>
-        <div class="hostnames-container">
-          <select name="hostnames" class="hostnames" multiple>
-          </select>
-          <div class="list-control">
-            <button class="add">+</button>
-            <button class="remove">-</button>
+      </div>
+    </section>
+    <section class="config tab">
+      <h1>Configure flo</h1>
+      <form>
+        <section>
+          <div class="hostnames-container">
+            <label for="hostnames">Hostnames</label>
+            <p class="desc">Hostnames to start flo for. Could be either the full string to match or a regexp in the form of <code>/example\.com/gi</code>.</p>
+            <div class="hostnames-options">
+              <ol class="hostnames"></ol>
+              <button class="add">Add Hostname</button>
+            </div>
           </div>
-        </div>
-        <div>
-         <input name="port" />
-        </div>
-      </section>
-    </form>
-
+          <div class="port-container">
+            <label for="port">Server port number:</label>
+            <p class="desc">The port number your flo server is listening on.</p>
+           <input name="port" />
+          </div>
+        </section>
+      </form>
+    </section>
   </main>
   <script src="configure.js"></script>
 </body>

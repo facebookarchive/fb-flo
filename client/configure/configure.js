@@ -1,4 +1,9 @@
 (function () {
+
+  /**
+   * Utils.
+   */
+
   var $ = document.querySelector.bind(document);
 
   function $$() {
@@ -6,9 +11,28 @@
     return [].slice.call(els);
   }
 
+  /**
+   * Navigation.
+   */
+
+  $('nav').onclick = function(e) {
+    if (e.target.nodeName !== 'LI') return;
+    $$('.selected').forEach(function(el) {
+      el.classList.remove('selected');
+    });
+    e.target.classList.add('selected');
+    var tabClass = e.target.getAttribute('data-tab');
+    var tabEl = $('.' + tabClass);
+    tabEl && tabEl.classList.add('selected');
+  };
+
+  /**
+   * Storage.
+   */
+
   function save() {
-    var hostnames = $$('.hostnames option').map(function (el){
-      return el.value.trim();
+    var hostnames = $$('.hostnames .item span').map(function(el) {
+      return el.textContent.trim();
     });
     var port = $('input[name="port"').value.trim();
     localStorage.setItem('flo-config', JSON.stringify({
@@ -34,12 +58,26 @@
     $('input[name="port"').value = port;
   }
 
+  /**
+   * Templates.
+   */
+
   function createHostnameOption(val) {
-    var option = document.createElement('option');
-    option.value = val;
-    option.text = val;
+    var option = document.createElement('li');
+    var text = document.createElement('span');
+    var remove = document.createElement('a');
+    remove.textContent = 'x';
+    remove.classList.add('remove');
+    text.textContent = val;
+    option.appendChild(text);
+    option.appendChild(remove);
+    option.classList.add('item');
     return option;
   }
+
+  /**
+   * Event handlers.
+   */
 
   $('form').onsubmit = function (e) {
     e.preventDefault();
@@ -47,8 +85,7 @@
 
   $('button.add').onclick = function () {
     var hostname = prompt(
-      'Enter hostname pattern. Surround with / for regex' +
-      '\ne.g. /example\\.com/gi'
+      'Enter hostname pattern:'
     );
     if (!hostname) {
       return;
@@ -58,11 +95,11 @@
     save();
   };
 
-  $('button.remove').onclick = function () {
-    $$('.hostnames :checked').forEach(function(el) {
-      $('.hostnames').removeChild(el);
-    });
-    save();
+  $('.hostnames').onclick = function (e) {
+    if (e.target.classList.contains('remove')) {
+      e.target.parentNode.parentNode.removeChild(e.target.parentNode);
+      save();
+    }
   };
 
   $('form').onchange = save;
