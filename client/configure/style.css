@@ -266,7 +266,7 @@ input[name="port"] {
 }
 
 .status .indicator.connecting {
-  background-color: yellow;
+  background-color: orange;
 }
 
 .status .indicator.disabled {
