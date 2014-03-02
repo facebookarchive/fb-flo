@@ -8,13 +8,14 @@
 
   function FloClient() {
     log('booting');
-    this.config = this.loadConfig();
+    this.loadConfig();
     this.session = null;
     this.panelWindow = null;
-    this.start = this.start.bind(this);
+    this.panelEventBuffer = [];
     this.status = this.status.bind(this);
     this.startNewSession = this.startNewSession.bind(this);
-    this.createPanel(this.start);
+    this.createPanel();
+    this.start();
   }
 
   FloClient.prototype.loadConfig = function() {
@@ -39,7 +40,30 @@
         port: 8888
       };
     }
-    return config;
+
+    this.config =  config;
+  };
+
+  FloClient.prototype.saveConfig = function() {
+    localStorage.setItem('flo-config', JSON.stringify(this.config));
+  };
+
+  FloClient.prototype.listenToPanel = function(type, callback) {
+    if (!this.panelWindow) {
+      throw new Error('Panel not found');
+    }
+    this.panelWindow.addEventListener('flo_' + type, callback.bind(this));
+  };
+
+  FloClient.prototype.triggerEvent = function (type, data) {
+    var event = new Event('flo_' + type);
+    event.data = data;
+    if (this.panelWindow) {
+      this.panelWindow.dispatchEvent(event);
+    } else {
+      this.panelEventBuffer.push(event);
+    }
+    return event;
   };
 
   FloClient.prototype.createPanel = function(callback) {
@@ -51,15 +75,27 @@
       function (panel) {
         panel.onShown.addListener(function(panelWindow) {
           self.panelWindow = panelWindow;
-          callback && callback();
+          self.bindPanelEvents();
         });
       }
     );
   };
 
+  FloClient.prototype.bindPanelEvents = function() {
+    this.listenToPanel('config_changed', function() {
+      this.loadConfig();
+      this.startNewSession();
+    });
+    this.listenToPanel('retry', this.startNewSession);
+    this.listenToPanel('enable_for_host', this.enableForHost);
+    this.panelEventBuffer.forEach(function(event) {
+      this.panelWindow.dispatchEvent(event);
+    }, this);
+    this.panelEventBuffer = [];
+  };
+
   FloClient.prototype.start = function() {
     this.status('starting');
-    this.panelWindow.addEventListener('config_changed', this.startNewSession);
     this.startNewSession();
   };
 
@@ -69,39 +105,57 @@
     this.session = null;
   };
 
+  FloClient.prototype.getLocation = function(callback) {
+    chrome.devtools.inspectedWindow['eval'](
+      '({ host: location.hostname, href: location.href })',
+      callback.bind(this)
+    );
+  };
+
+  FloClient.prototype.matchHost = function(host) {
+    var config = this.config;
+    for (var i = 0; i < config.hostnames.length; i++) {
+      var pattern = config.hostnames[i];
+      var matched = false;
+      if (pattern instanceof RegExp) {
+        matched = pattern.exec(host);
+      } else {
+        matched = pattern === host;
+      }
+      if (matched) return true;
+    }
+    return false;
+  };
+
   FloClient.prototype.startNewSession = function() {
     if (this.session) {
       this.stop();
     }
 
-    chrome.devtools.inspectedWindow['eval'](
-      '({ host: location.hostname, href: location.href })',
+    this.getLocation(
       function (result) {
-        var config = this.config;
-        for (var i = 0; i < config.hostnames.length; i++) {
-          var pattern = config.hostnames[i];
-          var matched = false;
-          if (pattern instanceof RegExp) {
-            matched = pattern.exec(result.host);
-          } else {
-            matched = pattern === result.host;
-          }
-          if (matched) {
-            this.session = new Session(result, config.port, this.status);
-            this.session.start();
-          } else {
-            this.status('disabled');
-          }
+        if (this.matchHost(result.host)) {
+          this.session = new Session(result, this.config.port, this.status);
+          this.session.start();
+        } else {
+          this.status('disabled');
         }
-      }.bind(this)
+      }
     );
   };
 
-  FloClient.prototype.status = function(status, aux) {
-    if (!this.panelWindow) {
-      throw new Error('Expected panel window');
-    }
+  FloClient.prototype.enableForHost = function() {
+    this.getLocation(function(result) {
+      console.log(arguments);
+      if (!this.matchHost(result.host)) {
+        this.config.hostnames.push(result.host);
+        this.saveConfig();
+        this.startNewSession();
+      }
+    });
+  };
 
+  FloClient.prototype.status = function(status, aux) {
     var text, action;
     switch (status) {
       case 'starting':
@@ -128,13 +182,11 @@
         throw new Error('Unknown session status.');
     }
 
-    var event = new Event('flo_status_change');
-    event.data = {
+    this.triggerEvent('status_change', {
       type: status,
       text: text,
       action: action
-    }
-    this.panelWindow.dispatchEvent(event);
+    });
   };
 
   new FloClient();

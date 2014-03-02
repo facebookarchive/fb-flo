@@ -31,7 +31,7 @@ this.Connection = (function() {
     }.bind(this);
     ws.onmessage = this._onMessage.bind(this);
     ws.onclose = this._retry.bind(this);
-    ws.close();
+
     this.ws = ws;
     return this;
   };
@@ -123,6 +123,7 @@ this.Connection = (function() {
    * @return {Connection} this
    */
   Connection.prototype.disconnect = function (callback) {
+    callback = callback || NOP;
     if (this.connected()) {
       this.ws.onclose = callback;
       this.ws.close();

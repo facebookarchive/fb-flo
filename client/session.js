@@ -133,12 +133,13 @@ this.Session = (function () {
       })
       .connecting(function() {
         self.status('connecting');
-        logger.logInContext(
-          'flo starting, connecting to host ' + self.loc.host,
-          'debug'
-        );
       })
       .connect();
+
+      logger.logInContext(
+        'flo starting, connecting to host ' + self.loc.host,
+        'debug'
+      );
   };
 
   /**
@@ -219,6 +220,12 @@ this.Session = (function () {
         );
       }
     });
+  };
+
+  Session.prototype.destroy = function() {
+    log('destroying');
+    this._removeEventListeners();
+    this.conn && this.conn.disconnect();
   };
 
   return Session;

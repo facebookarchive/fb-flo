@@ -11,6 +11,13 @@
     return [].slice.call(els);
   }
 
+  function triggerEvent(type, data) {
+    var event = new Event('flo_' + type);
+    event.data = data;
+    window.dispatchEvent(event);
+    return event;
+  };
+
   /**
    * Navigation.
    */
@@ -39,8 +46,7 @@
       port: port,
       hostnames: hostnames
     }));
-    var event = new Event('config_changed');
-    window.dispatchEvent(event);
+    triggerEvent('config_changed');
   }
 
   function load() {
@@ -104,11 +110,11 @@
 
   $('form').onchange = save;
 
-  var prevStatus = null;
+  var prevStatus = 'disabled';
   window.addEventListener('flo_status_change', function(e) {
     var data = e.data;
     var indicator = $('.status .indicator')
-    if (prevStatus) indicator.classList.remove(prevStatus);
+    indicator.classList.remove(prevStatus);
     indicator.classList.add(data.type);
     prevStatus = data.type;
     $('.status .text').textContent = data.text;
@@ -119,6 +125,14 @@
       $('.status .' + data.action).classList.remove('hidden');
     }
   });
+
+  $('.action.retry').onclick = function() {
+    triggerEvent('retry');
+  };
+
+  $('.action.enable').onclick = function() {
+    triggerEvent('enable_for_host');
+  };
 
   load();
 })();
