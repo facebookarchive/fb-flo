@@ -150,10 +150,10 @@
 
   FloClient.prototype.enableForHost = function() {
     this.getLocation(function(host) {
-      console.log(arguments);
       if (!this.matchHost(host)) {
         this.config.hostnames.push(host);
         this.saveConfig();
+        this.triggerEvent('load', this.config);
         this.startNewSession();
       }
     });

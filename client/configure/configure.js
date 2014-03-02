@@ -53,6 +53,7 @@
   }
 
   function load(config) {
+    $('.hostnames').innerHTML = '';
     config.hostnames.forEach(function(host) {
       $('.hostnames').appendChild(createHostnameOption(host));
     });
