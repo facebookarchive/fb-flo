@@ -261,11 +261,23 @@ input[name="port"] {
   margin: 0 10px -3px 10px;
 }
 
+.status .indicator.connected {
+  background-color: green;
+}
+
+.status .indicator.connecting {
+  background-color: yellow;
+}
+
+.status .indicator.disabled {
+  background-color: gray;
+}
+
 .status .text {
   line-height: 19px;
 }
 
-.status .enable {
+.status .action {
   display: block;
   margin-top: 13px;
 }

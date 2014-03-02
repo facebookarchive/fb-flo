@@ -5,8 +5,10 @@ this.Session = (function () {
 
   var log = logger('session');
 
-  function Session(loc) {
+  function Session(loc, port, status) {
     this.loc = loc;
+    this.port = port;
+    this.status = status;
     this.resources = null;
     this.conn = null;
     this.listeners = {};
@@ -107,7 +109,8 @@ this.Session = (function () {
    */
   Session.prototype._connect = function(callback) {
     callback = once(callback);
-    this.conn = new Connection(this.loc.host)
+    var self = this;
+    this.conn = new Connection(this.loc.host, this.port)
       .message(this._onMessage.bind(this))
       .error(function (err) {
         logger.logInContext(
@@ -115,6 +118,7 @@ this.Session = (function () {
           'error'
         );
         callback();
+        self.status('error');
       })
       .open(function () {
         logger.logInContext(
@@ -122,13 +126,19 @@ this.Session = (function () {
           'debug'
         );
         callback();
+        self.status('connected');
+      })
+      .retry(function(delay) {
+        self.status('retry', delay);
+      })
+      .connecting(function() {
+        self.status('connecting');
+        logger.logInContext(
+          'flo starting, connecting to host ' + self.loc.host,
+          'debug'
+        );
       })
       .connect();
-
-    logger.logInContext(
-      'flo starting, connecting to host ' + this.loc.host,
-      'debug'
-    );
   };
 
   /**

@@ -8,9 +8,10 @@ this.Connection = (function() {
   var DELAY = 500;
   var RETRIES = 5;
 
-  function Connection(host) {
+  function Connection(host, port) {
     this._retries = RETRIES;
     this.host = host;
+    this.port = port;
   }
 
   /**
@@ -19,7 +20,8 @@ this.Connection = (function() {
    * @returns {Connection} this
    */
   Connection.prototype.connect = function() {
-    var ws = new WebSocket('ws://' + this.host + ':8888/');
+    var ws = new WebSocket('ws://' + this.host + ':' + this.port + '/');
+    (this._connectingCallback || NOP)();
     log('Connecting ...', ws);
 
     ws.onopen = function () {
@@ -28,8 +30,8 @@ this.Connection = (function() {
       this._retries = RETRIES;
     }.bind(this);
     ws.onmessage = this._onMessage.bind(this);
-    ws.onclose = this.retry.bind(this);
-
+    ws.onclose = this._retry.bind(this);
+    ws.close();
     this.ws = ws;
     return this;
   };
@@ -38,7 +40,7 @@ this.Connection = (function() {
    * @api
    * @arg {object} evt The event that caused the retry.
    */
-  Connection.prototype.retry = function(evt) {
+  Connection.prototype._retry = function(evt) {
     log('Failed to connect with %s %s', evt.reason, evt.code);
     if (--this._retries < 1) {
       var err = new Error(evt.reason || 'Error connecting.');
@@ -46,6 +48,7 @@ this.Connection = (function() {
     } else {
       var delay = (RETRIES - this._retries) * DELAY;
       log('Reconnecting in ', delay);
+      (this._retryCallback || NOP)(delay);
       setTimeout(function () {
         this.connect();
       }.bind(this), delay);
@@ -85,6 +88,31 @@ this.Connection = (function() {
    */
   Connection.prototype.open = function(callback, thisObj) {
     this._openCallback = callback.bind(thisObj || null);
+    return this;
+  };
+
+  /**
+   * Registers a retry handler.
+   * @api
+   * @arg {function} callback
+   * @arg {object} thisObj
+   * @return {Connection} this
+   */
+  Connection.prototype.retry = function(callback, thisObj) {
+    this._retryCallback = callback.bind(thisObj || null);
+    return this;
+  };
+
+
+  /**
+   * Connecting callback
+   * @api
+   * @arg {function} callback
+   * @arg {object} thisObj
+   * @return {Connection} this
+   */
+  Connection.prototype.connecting = function(callback, thisObj) {
+    this._connectingCallback = callback.bind(thisObj || null);
     return this;
   };
 

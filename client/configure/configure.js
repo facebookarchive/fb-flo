@@ -103,5 +103,22 @@
   };
 
   $('form').onchange = save;
+
+  var prevStatus = null;
+  window.addEventListener('flo_status_change', function(e) {
+    var data = e.data;
+    var indicator = $('.status .indicator')
+    if (prevStatus) indicator.classList.remove(prevStatus);
+    indicator.classList.add(data.type);
+    prevStatus = data.type;
+    $('.status .text').textContent = data.text;
+    $$('.status .action').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+    if (data.action) {
+      $('.status .' + data.action).classList.remove('hidden');
+    }
+  });
+
   load();
 })();
