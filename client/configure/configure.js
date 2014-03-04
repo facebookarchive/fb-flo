@@ -146,6 +146,8 @@
         return a.toString()
       }).join(' ')
     );
-    $('.log-box').appendChild(item);
+    var box = $('.log-box');
+    box.appendChild(item);
+    box.scrollTop = box.scrollHeight;
   });
 })();

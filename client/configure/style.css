@@ -112,7 +112,7 @@ nav ol li.selected {
 nav ol li {
   position: relative;
   height: 36px;
-  padding: 0 5px 0 5px;
+  padding: 0 5px 0 7px;
   white-space: nowrap;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -121,7 +121,7 @@ nav ol li {
 }
 
 nav ol li:first-child {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 section.tab {

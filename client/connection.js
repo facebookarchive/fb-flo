@@ -148,7 +148,6 @@
    */
   Connection.prototype._onMessage = function(evt) {
     var msg = JSON.parse(evt.data);
-    this.log('Message', msg);
     (this._msgCallback || NOP)(msg);
   };
 
