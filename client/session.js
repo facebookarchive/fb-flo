@@ -1,6 +1,6 @@
 /*global Connection:false,logger:false*/
 
-this.Session = (function () {
+(function () {
   'use strict';
 
   function Session(host, port, status, logger) {
@@ -113,12 +113,12 @@ this.Session = (function () {
     this.conn = new Connection(this.host, this.port, this.logger)
       .message(this._onMessage.bind(this))
       .error(function (err) {
-        callback();
         self.status('error');
+        callback();
       })
       .open(function () {
-        callback();
         self.status('connected');
+        callback();
       })
       .retry(function(delay) {
         self.status('retry', delay);
@@ -135,6 +135,8 @@ this.Session = (function () {
    * @arg {function} callback
    */
   Session.prototype._started = function() {
+    this.log('Started');
+    this.status('started');
     this._listen(
       chrome.devtools.network,
       'onNavigated',
@@ -212,5 +214,10 @@ this.Session = (function () {
     this.conn && this.conn.disconnect();
   };
 
-  return Session;
-})();
+  if (typeof module === 'object' && typeof exports === 'object') {
+    module.exports = Session;
+  } else {
+    this.Session = Session;
+  }
+
+}).call(this);

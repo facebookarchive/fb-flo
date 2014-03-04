@@ -261,7 +261,8 @@ input[name="port"] {
   margin: 0 10px -3px 10px;
 }
 
-.status .indicator.connected {
+.status .indicator.connected,
+.status .indicator.started {
   background-color: green;
 }
 

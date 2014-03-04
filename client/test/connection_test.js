@@ -2,14 +2,8 @@ var assert = require('assert');
 var Connection = require('../connection');
 var Server = require('../../lib/server');
 var WebSocket = require('./browser_websocket');
-
+var mockLogger = require('./logger_mock');
 global.WebSocket = WebSocket;
-
-function loggerMock() {
-  return function() {
-    return function() {};
-  }
-}
 
 describe('Connection', function() {
   var port = 8543;
@@ -23,7 +17,7 @@ describe('Connection', function() {
     server = new Server({
       port: port
     });
-    con = new Connection('localhost', port, loggerMock)
+    con = new Connection('localhost', port, mockLogger)
       .open(function() {
         server.broadcast({hi: 1});
       })
@@ -38,7 +32,7 @@ describe('Connection', function() {
   });
 
   it('should retry to connect', function(done) {
-    con = new Connection('localhost', port, loggerMock)
+    con = new Connection('localhost', port, mockLogger)
       .open(function() {
         done();
       })

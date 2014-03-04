@@ -179,6 +179,9 @@
       case 'connected':
         text = 'Connected';
         break;
+      case 'started':
+        text = 'Started';
+        break;
       case 'retry':
         text = 'Failed to connect, retrying in ' + (aux / 1000) + 's';
         break;
