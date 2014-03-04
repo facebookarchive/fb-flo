@@ -1,6 +1,6 @@
 /*global logger:false*/
 
-this.Connection = (function() {
+(function() {
   'use strict';
   var NOP = function () {};
   var DELAY = 500;
@@ -152,5 +152,15 @@ this.Connection = (function() {
     (this._msgCallback || NOP)(msg);
   };
 
-  return Connection;
-})();
+  /**
+   * We support node for testing. In the browser we just export to the global
+   * object.
+   */
+
+  if (typeof module === 'object' && typeof exports === 'object') {
+    module.exports = Connection;
+  } else {
+    this.Connection = Connection;
+  }
+
+}).call(this);
