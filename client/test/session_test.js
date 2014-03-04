@@ -79,7 +79,9 @@ describe('Session', function() {
       chrome.devtools.inspectedWindow.getResources = function(callback) {
         callback([{
           url: 'http://wat',
-          setContent: function() { this.setContent.apply(this, arguments) }.bind(this)
+          setContent: function() {
+            this.setContent.apply(this, arguments)
+          }.bind(this)
         }]);
       }.bind(this);
       this.session = new Session('localhost', port, function(state) {
