@@ -23,7 +23,7 @@ $ npm install flo
 
 There are a few ways to start the flo server, follow the section applicable to your use case.
 
-### Starting the flo server
+### 1. Start the flo server
 
 #### You have no build step
 
@@ -110,7 +110,7 @@ So a file with `filepath` has changed, this function is called to determine whet
     * `"indexOf"` use `String.prototype.indexOf` check
     * `/regexp/` a regexp object to exec.
 
-### Activating flo from Chrome
+### 2. Activate flo
 
 To activate flo from the browser:
 
