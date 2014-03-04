@@ -1,8 +1,8 @@
 var assert = require('assert');
 var Server = require('../../lib/server');
-var Session = require('../session');
+var Session = require('../../client/session');
 var WebSocket = require('./browser_websocket')
-var Connection = require('../connection');
+var Connection = require('../../client/connection');
 var mockLogger = require('./logger_mock');
 
 global.Connection = Connection;

@@ -4,7 +4,7 @@
   "description": "Static resource hot swapping for Chrome",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha --bail"
+    "test": "node_modules/mocha/bin/mocha ./test/**/*_test.js --bail"
   },
   "author": "",
   "license": "BSD-2-Clause",

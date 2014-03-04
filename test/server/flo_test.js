@@ -1,5 +1,5 @@
 var fs = require('fs');
-var flo = require('../');
+var flo = require('../../');
 var assert = require('assert');
 var WebSocketClient = require('websocket').client;
 

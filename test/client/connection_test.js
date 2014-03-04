@@ -1,5 +1,5 @@
 var assert = require('assert');
-var Connection = require('../connection');
+var Connection = require('../../client/connection');
 var Server = require('../../lib/server');
 var WebSocket = require('./browser_websocket');
 var mockLogger = require('./logger_mock');
