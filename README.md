@@ -1,9 +1,9 @@
 flo
 ---
 
-Live coding tool that is easy to integrate with your build step.
+Web live coding tool that is easy to integrate with your build step and development environment.
 
-flo enables static resource hot swapping in Chrome while easily integrating into your build step and development tools.
+flo enables static resource hot swapping in Chrome while easily integrating into your build step and development environment.
 You can write code using your favorite editor and see it almost instantaneously in the browser without reloading the page.
 
 ## Installation
@@ -21,7 +21,9 @@ $ npm install flo
 
 ### Getting Started
 
-There are a few ways to get started with flo, follow the section applicable to your use case.
+There are a few ways to start the flo server, follow the section applicable to your use case.
+
+### Starting the flo server
 
 #### You have no build step
 
@@ -84,11 +86,9 @@ module.exports = {
 #### You have a build step and want to use flo programmatically
 
 flo exports a single function:
-
 ```js
 flo(dirToWatch, [options], [resolver(filepath, callback)])
 ```
-
 * `dirToWatch` absolute or relative path to the directory to watch.
 * `options` hash of options:
     * `port`: port to start the server on (defaults to 8888).
@@ -109,3 +109,15 @@ So a file with `filepath` has changed, this function is called to determine whet
     * `"equal"` test the updated resource `resourceURL` against existing browser resources using an equality check.
     * `"indexOf"` use `String.prototype.indexOf` check
     * `/regexp/` a regexp object to exec.
+
+### Activating flo from Chrome
+
+To activate flo from the browser:
+
+* Open Chrome DevTools.
+* Click on the new 'flo' pane.
+* Click on 'Activate for this site'
+
+See screenshot:
+
+![](http://i.imgur.com/SamY32i.png)
