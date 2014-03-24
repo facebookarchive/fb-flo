@@ -18,30 +18,30 @@ describe('Connection', function() {
       port: port
     });
     con = new Connection('localhost', port, mockLogger)
-      .open(function() {
+      .onopen(function() {
         server.broadcast({hi: 1});
       })
-      .message(function(msg) {
+      .onmessage(function(msg) {
         assert.deepEqual(msg, {
           hi: 1
         });
         done();
       })
-      .error(done)
+      .onerror(done)
       .connect();
   });
 
   it('should retry to connect', function(done) {
     con = new Connection('localhost', port, mockLogger)
-      .open(function() {
+      .onopen(function() {
         done();
       })
-      .retry(function(){
+      .onretry(function(){
         server = new Server({
           port: port
         });
       })
-      .error(done)
+      .onerror(done)
       .connect();
   });
 

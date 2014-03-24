@@ -111,19 +111,19 @@
     callback = once(callback);
     var self = this;
     this.conn = new Connection(this.host, this.port, this.logger)
-      .message(this._onMessage.bind(this))
-      .error(function (err) {
+      .onmessage(this._onMessage.bind(this))
+      .onerror(function (err) {
         self.status('error');
         callback();
       })
-      .open(function () {
+      .onopen(function () {
         self.status('connected');
         callback();
       })
-      .retry(function(delay) {
+      .onretry(function(delay) {
         self.status('retry', delay);
       })
-      .connecting(function() {
+      .onconnecting(function() {
         self.status('connecting');
       })
       .connect();

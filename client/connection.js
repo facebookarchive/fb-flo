@@ -2,9 +2,24 @@
 
 (function() {
   'use strict';
-  var NOP = function () {};
+
+  /**
+   * Export to node for testing and to global for production.
+   */
+
+  if (typeof module === 'object' && typeof exports === 'object') {
+    module.exports = Connection;
+  } else {
+    this.Connection = Connection;
+  }
+
+  /**
+   * Constants.
+   */
+
   var DELAY = 500;
   var RETRIES = 5;
+  var NOP = function () {};
 
   /**
    * Takes care of connecting, messaging, handling connection retries with the
@@ -18,11 +33,26 @@
    */
 
   function Connection(host, port, logger) {
-    this._retries = RETRIES;
+    this.retries = RETRIES;
     this.host = host;
     this.port = port;
     this.log = logger('connection');
+    this.openHandler = this.openHandler.bind(this);
+    this.messageHandler = this.messageHandler.bind(this);
+    this.closeHandler = this.closeHandler.bind(this);
   }
+
+  /**
+   * Callbacks.
+   */
+
+  Connection.prototype.callbacks = {
+    connecting: NOP,
+    message: NOP,
+    error: NOP,
+    retry: NOP,
+    open: NOP
+  };
 
   /**
    * Connect to host.
@@ -34,40 +64,16 @@
   Connection.prototype.connect = function() {
     var url = 'ws://' + this.host + ':' + this.port + '/';
     var ws = new WebSocket(url);
-    (this._connectingCallback || NOP)();
+
+    this.callbacks.connecting();
     this.log('Connecting to', url);
 
-    ws.onopen = function () {
-      this.log('Connected');
-      (this._openCallback || NOP)();
-      this._retries = RETRIES;
-    }.bind(this);
-    ws.onmessage = this._onMessage.bind(this);
-    ws.onclose = this._retry.bind(this);
+    ws.onopen = this.openHandler;
+    ws.onmessage = this.messageHandler;
+    ws.onclose = this.closeHandler;
 
     this.ws = ws;
     return this;
-  };
-
-  /**
-   * Retry to connect.
-   *
-   * @param {object} evt The event that caused the retry.
-   */
-
-  Connection.prototype._retry = function(evt) {
-    this.log('Failed to connect with', evt.reason, evt.code);
-    if (--this._retries < 1) {
-      var err = new Error(evt.reason || 'Error connecting.');
-      (this._errCallback || NOP)(err);
-    } else {
-      var delay = (RETRIES - this._retries) * DELAY;
-      this.log('Reconnecting in ', delay);
-      (this._retryCallback || NOP)(delay);
-      setTimeout(function () {
-        this.connect();
-      }.bind(this), delay);
-    }
   };
 
   /**
@@ -79,10 +85,7 @@
    * @public
    */
 
-  Connection.prototype.message = function(callback, thisObj) {
-    this._msgCallback = callback.bind(thisObj || null);
-    return this;
-  };
+  Connection.prototype.onmessage = makeCallbackRegistrar('message');
 
   /**
    * Registers an error handler.
@@ -93,10 +96,7 @@
    * @public
    */
 
-  Connection.prototype.error = function(callback, thisObj) {
-    this._errCallback = callback.bind(thisObj || null);
-    return this;
-  };
+  Connection.prototype.onerror = makeCallbackRegistrar('error');
 
   /**
    * Registers a connection handler.
@@ -107,10 +107,7 @@
    * @public
    */
 
-  Connection.prototype.open = function(callback, thisObj) {
-    this._openCallback = callback.bind(thisObj || null);
-    return this;
-  };
+  Connection.prototype.onopen = makeCallbackRegistrar('open');
 
   /**
    * Registers a retry handler.
@@ -121,11 +118,7 @@
    * @public
    */
 
-  Connection.prototype.retry = function(callback, thisObj) {
-    this._retryCallback = callback.bind(thisObj || null);
-    return this;
-  };
-
+  Connection.prototype.onretry = makeCallbackRegistrar('retry');
 
   /**
    * Connecting callback
@@ -136,10 +129,7 @@
    * @public
    */
 
-  Connection.prototype.connecting = function(callback, thisObj) {
-    this._connectingCallback = callback.bind(thisObj || null);
-    return this;
-  };
+  Connection.prototype.onconnecting = makeCallbackRegistrar('connecting');
 
   /**
    * Disconnects from the server
@@ -178,19 +168,61 @@
    * @private
    */
 
-  Connection.prototype._onMessage = function(evt) {
+  Connection.prototype.messageHandler = function(evt) {
     var msg = JSON.parse(evt.data);
-    (this._msgCallback || NOP)(msg);
+    this.callbacks.message(msg);
+  };
+
+
+  /**
+   * Open handler.
+   *
+   * @private
+   */
+
+  Connection.prototype.openHandler = function() {
+    this.log('Connected');
+    this.callbacks.open();
+    this.retries = RETRIES;
+  };
+
+
+  /**
+   * Retries to connect or emits error.
+   *
+   * @param {object} evt The event that caused the retry.
+   * @private
+   */
+
+  Connection.prototype.closeHandler = function(evt) {
+    this.log('Failed to connect with', evt.reason, evt.code);
+    this.retries -= 1;
+    if (this.retries < 1) {
+      var err = new Error(evt.reason || 'Error connecting.');
+      this.callbacks.error(err);
+    } else {
+      var delay = (RETRIES - this.retries) * DELAY;
+      this.log('Reconnecting in ', delay);
+      this.callbacks.retry(delay);
+      setTimeout(function () {
+        this.connect();
+      }.bind(this), delay);
+    }
   };
 
   /**
-   * Export to node for testing and to global for production.
+   * Creates a function that registers an event listener when called.
+   *
+   * @param {string} name
+   * @return {function}
+   * @private
    */
 
-  if (typeof module === 'object' && typeof exports === 'object') {
-    module.exports = Connection;
-  } else {
-    this.Connection = Connection;
+  function makeCallbackRegistrar(name) {
+    return function(cb, context) {
+      this.callbacks[name] = cb.bind(context || null);
+      return this;
+    };
   }
 
 }).call(this);
