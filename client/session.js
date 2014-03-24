@@ -3,6 +3,27 @@
 (function () {
   'use strict';
 
+  /**
+   * Export to Node for testing and to global for production.
+   */
+
+  if (typeof module === 'object' && typeof exports === 'object') {
+    module.exports = Session;
+  } else {
+    this.Session = Session;
+  }
+
+  /**
+   * Manages a user sessios.
+   *
+   * @param {string} host
+   * @param {number} port
+   * @param {function} status
+   * @param {function} logger
+   * @class Session
+   * @public
+   */
+
   function Session(host, port, status, logger) {
     this.host = host;
     this.port = port;
@@ -12,28 +33,34 @@
     this.resources = null;
     this.conn = null;
     this.listeners = {};
+    this.messageHandler = this.messageHandler.bind(this);
+    this.started = this.started.bind(this);
   }
 
   /**
    * Registers the resources, connects to server and listens to events.
-   * @api
+   *
+   * @public
    */
+
   Session.prototype.start = function() {
     this.log('Starting flo for host', this.host);
-    this._getResources(this._connect.bind(this, this._started.bind(this)));
+    this.getResources(this.connect.bind(this, this.started));
   };
 
   /**
    * Similar to restart but does only what's needed to get flo started.
-   * @api
+   *
+   * @public
    */
+
   Session.prototype.restart = function() {
     this.log('Restarting');
-    this._removeEventListeners();
+    this.removeEventListeners();
     if (this.conn.connected()) {
       logger.logInContext('flo running.');
       // No need to reconnect. We just refetch the resources.
-      this._getResources(this._started.bind(this));
+      this.getResources(this.started.bind(this));
     } else {
       this.start();
     }
@@ -44,11 +71,14 @@
    * @see http://developer.chrome.com/extensions/events
    * We also keep an internal map of events we're listening to so we can
    * unsubscribe in the future.
-   * @arg {object} object
-   * @arg {string} event
-   * @arg {function} listener
+   *
+   * @param {object} object
+   * @param {string} event
+   * @param {function} listener
+   * @private
    */
-  Session.prototype._listen = function(obj, event, listener) {
+
+  Session.prototype.listen = function(obj, event, listener) {
     listener = listener.bind(this);
     obj[event].addListener(listener);
     this.listeners[event] = {
@@ -59,9 +89,12 @@
 
 
   /**
-   * Remove all listeners to the chrome event api, @see this._listen
+   * Remove all event listeners.
+   *
+   * @private
    */
-  Session.prototype._removeEventListeners = function() {
+
+  Session.prototype.removeEventListeners = function() {
     Object.keys(this.listeners).forEach(function(event) {
       var desc = this.listeners[event];
       desc.obj[event].removeListener(desc.listener);
@@ -70,16 +103,19 @@
 
   /**
    * Registers the resources and listens to onResourceAdded events.
-   * @arg {function} callback
+   *
+   * @param {function} callback
+   * @private
    */
-  Session.prototype._getResources = function(callback) {
+
+  Session.prototype.getResources = function(callback) {
     var self = this;
     chrome.devtools.inspectedWindow.getResources(function (resources) {
       self.resources = resources;
       // After we register the current resources, we listen to the
       // onResourceAdded event to push on more resources lazily fetched
       // to our array.
-      self._listen(
+      self.listen(
         chrome.devtools.inspectedWindow,
         'onResourceAdded',
         function (res) {
@@ -91,27 +127,17 @@
   };
 
   /**
-   * Utility to ensure's a function is called only once.
-   * @arg {function} cb
+   * Connect to server.
+   *
+   * @param {function} callback
+   * @private
    */
-  function once(cb) {
-    var called = false;
-    return function() {
-      if (!called) {
-        called = true;
-        return cb.apply(this, arguments);
-      }
-    };
-  }
 
-  /**
-   * @arg {function} callback
-   */
-  Session.prototype._connect = function(callback) {
+  Session.prototype.connect = function(callback) {
     callback = once(callback);
     var self = this;
     this.conn = new Connection(this.host, this.port, this.logger)
-      .onmessage(this._onMessage.bind(this))
+      .onmessage(this.messageHandler)
       .onerror(function (err) {
         self.status('error');
         callback();
@@ -132,31 +158,28 @@
   /**
    * Does whatever needs to be done after the session is started. Currenlty
    * just listening to page refresh events.
-   * @arg {function} callback
+   *
+   * @param {function} callback
    */
-  Session.prototype._started = function() {
+
+  Session.prototype.started = function() {
     this.log('Started');
     this.status('started');
-    this._listen(
+    this.listen(
       chrome.devtools.network,
       'onNavigated',
       this.restart
     );
   };
 
-  function indexOfMatcher(val, resourceURL) {
-    return val.indexOf(resourceURL) > -1;
-  }
-
-  function equalMatcher(val, resourceURL) {
-    return resourceURL === val;
-  }
-
   /**
    * Handler for messages from the server.
-   * @arg {object} msg
+   *
+   * @param {object} updatedResource
+   * @private
    */
-  Session.prototype._onMessage = function(updatedResource) {
+
+  Session.prototype.messageHandler = function(updatedResource) {
     this.log('Requested resource update', updatedResource.resourceURL);
 
     var match = updatedResource.match;
@@ -209,15 +232,40 @@
     }.bind(this));
   };
 
+  /**
+   * Destroys session.
+   *
+   * @public
+   */
+
   Session.prototype.destroy = function() {
-    this._removeEventListeners();
+    this.removeEventListeners();
     this.conn && this.conn.disconnect();
   };
 
-  if (typeof module === 'object' && typeof exports === 'object') {
-    module.exports = Session;
-  } else {
-    this.Session = Session;
+  /**
+   * Utility to ensure's a function is called only once.
+   *
+   * @param {function} cb
+   * @private
+   */
+
+  function once(cb) {
+    var called = false;
+    return function() {
+      if (!called) {
+        called = true;
+        return cb.apply(this, arguments);
+      }
+    };
+  }
+
+  function indexOfMatcher(val, resourceURL) {
+    return val.indexOf(resourceURL) > -1;
+  }
+
+  function equalMatcher(val, resourceURL) {
+    return resourceURL === val;
   }
 
 }).call(this);
