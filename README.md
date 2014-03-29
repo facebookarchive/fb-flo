@@ -1,10 +1,7 @@
 flo
 ---
 
-Web live coding tool that is easy to integrate with your build step and development environment.
-
-flo enables static resource hot swapping in Chrome while easily integrating into your build step and development environment.
-You can write code using your favorite editor and see it almost instantaneously in the browser without reloading the page.
+A static resource live editing tool for Chrome that's easy to integrate with your dev environment.
 
 ## Installation
 
@@ -72,6 +69,31 @@ module.exports = {
 };
 ```
 
+#### You have a build step but want to use flo programmatically
+
+```
+$ npm install flo
+```
+
+In your JavaScript:
+
+```js
+var flo = require('flo');
+
+flo(
+  dir,
+  {
+    port: 8888,
+    host: 'localhost',
+    verbose: false,
+    glob: []
+  },
+  resolverCallback
+);
+```
+
+See [resolver](#resolverfilepath-callback) documentation.
+
 ##### flofile.js config
 
 * [`resolver`](#resolverfilepath-callback): a required function that's responsible for resolving file system changes to asset changes. See [`resolver`](#resolverfilepath-callback).
@@ -105,6 +127,7 @@ So a file with `filepath` has changed, this function is called to determine whet
 * `resourceChangeCallback` a callback function to respond with the resource to send to the client, it should send an object with:
   * `resourceURL` the resource URL that will be used to identify the resource to update in the browser.
   * `contents` the updated code.
+  * `reload` Forces a full page reload. Use this if you're sure the changed code cannot be hotswapped.
   * `match` identifies the matching function to be performed on the resource URL in the browser. Could be one of the following:
     * `"equal"` test the updated resource `resourceURL` against existing browser resources using an equality check.
     * `"indexOf"` use `String.prototype.indexOf` check
