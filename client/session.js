@@ -182,6 +182,11 @@
   Session.prototype.messageHandler = function(updatedResource) {
     this.log('Requested resource update', updatedResource.resourceURL);
 
+    if (updatedResource.reload) {
+      chrome.devtools.inspectedWindow.reload();
+      return;
+    }
+
     var match = updatedResource.match;
     var matcher;
 
