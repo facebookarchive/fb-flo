@@ -140,7 +140,6 @@
       .onmessage(this.messageHandler)
       .onerror(function (err) {
         self.status('error');
-        callback();
       })
       .onopen(function () {
         self.status('connected');
