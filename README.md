@@ -1,7 +1,7 @@
 flo
 ---
 
-A static resource live editing tool for Chrome that's easy to integrate with your dev environment.
+Flo is a static resource live editing tool for Chrome that's easy to integrate with your dev environment.
 
 ## Getting Started
 
