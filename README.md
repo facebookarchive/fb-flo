@@ -3,22 +3,13 @@ flo
 
 A static resource live editing tool for Chrome that's easy to integrate with your dev environment.
 
-## Installation
+## Getting Started
 
-### Install the extension
+### 1. Install the extension
 
 [TODO publish and add link to chrome webstore]
 
-### Install flo
-
-```
-$ npm install -g flo
-$ npm install flo
-```
-
-### Getting Started
-
-### 1. Configure flo server
+### 2. Configure flo server
 
 ```js
 var flo = require('flo');
@@ -52,7 +43,7 @@ var server = flo(
       * `"indexOf"` use `String.prototype.indexOf` check
       * `/regexp/` a regexp object to exec.
 
-### 2. Activate flo
+### 3. Activate flo
 
 To activate flo from the browser:
 
@@ -73,8 +64,17 @@ var flo = require('flo');
 var fs = require('fs');
 var exec = require('child_process').exec;
 
-module.exports = {
-  resolver: function (filepath, callback) {
+var server = flo('./lib/', {
+  port: 8888,
+  dir: './lib/',
+  glob: ['./lib/**/*.js', './lib/**/*.css']
+}, resolver);
+
+server.once('ready', function() {
+  console.log('Ready!');
+});
+
+function resolver(filepath, callback) {
     exec('make', function (err) {
       if (err) throw err;
       if (filepath.match(/\.js$/)) {
@@ -89,15 +89,6 @@ module.exports = {
         })
       }
     });
-  },
-  ready: function() {
-    console.log('ready');
-  },
-  options: {
-    port: 8888,
-    dir: './lib/',
-    glob: ['./lib/**/*.js', './lib/**/*.css']
   }
 };
 ```
-
