@@ -156,25 +156,27 @@
   };
 
   /**
-   * Match config patterns against `host`.
+   * Match config patterns against `host` and returns the matched site record.
    *
    * @param {string} host
+   * @return {object|null}
    * @private
    */
 
-  FloClient.prototype.matchHost = function(host) {
+  FloClient.prototype.getSite = function(host) {
     var config = this.config;
-    for (var i = 0; i < config.hostnames.length; i++) {
-      var pattern = config.hostnames[i];
+    for (var i = 0; i < config.sites.length; i++) {
+      var site = config.sites[i];
+      var pattern = site.pattern;
       var matched = false;
       if (pattern instanceof RegExp) {
         matched = pattern.exec(host);
       } else {
         matched = pattern === host;
       }
-      if (matched) return true;
+      if (matched) return site;
     }
-    return false;
+    return null;
   };
 
   /**
@@ -190,10 +192,12 @@
 
     this.getLocation(
       function (host) {
-        if (this.matchHost(host)) {
+        var site = this.getSite(host);
+        debugger;
+        if (site) {
           this.session = new Session(
-            host,
-            this.config.port,
+            site.server,
+            site.port || this.config.port,
             this.status,
             this.logger
           );
@@ -213,8 +217,11 @@
 
   FloClient.prototype.enableForHost = function() {
     this.getLocation(function(host) {
-      if (!this.matchHost(host)) {
-        this.config.hostnames.push(host);
+      if (!this.getSite(host)) {
+        this.config.sites.push({
+          pattern: host,
+          server: host
+        });
         this.saveConfig();
         this.triggerEvent('load', this.config);
         this.startNewSession();
@@ -281,17 +288,15 @@
       // Ignore parse error.
     }
     if (config) {
-      config.hostnames = config.hostnames.map(function(pattern) {
-        var m = pattern.match(/^\/(.+)\/([gim]{0,3})$/);
+      config.sites.forEach(function(item) {
+        var m = item.pattern.match(/^\/(.+)\/([gim]{0,3})$/);
         if (m && m[1]) {
-          return new RegExp(m[1], m[2]);
-        } else {
-          return pattern;
+          item.pattern = new RegExp(m[1], m[2]);
         }
       });
     } else {
       config = {
-        hostnames: [],
+        sites: [],
         port: 8888
       };
     }

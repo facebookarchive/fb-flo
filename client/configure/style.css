@@ -180,6 +180,7 @@ button:active {
 
 .hostnames-container {
   margin-bottom: 14px;
+  overflow: hidden;
 }
 
 .hostnames-options {
@@ -192,7 +193,7 @@ button:active {
   margin-top: 10px;
 }
 .hostnames {
-  min-height: 100px;
+  min-height: 115px;
   max-height: 180px;
   min-width: 300px;
   max-width: 80%;
@@ -241,15 +242,15 @@ button:active {
   clear: both;
 }
 
-input[name="port"] {
+input {
   border: 1px solid #ddd;
   font-size: 13px;
   padding: 4px;
-  margin-top: -2px;
 }
 
 .status {
-  margin-bottom: 15px;
+  min-height: 60px;
+  margin: 10px 0;
 }
 
 .status .indicator {
@@ -295,4 +296,32 @@ input[name="port"] {
   display: inline-block;
   overflow-y: scroll;
   margin-bottom: 15px;
+}
+
+.hostnames-options, .hostname-form {
+  float: left;
+}
+
+.hostname-form {
+  padding-left: 15px
+}
+
+.hostname-form input {
+  width: 165px;
+}
+
+.hostname-form div:nth-child(2) {
+  margin-top: 10px;
+}
+
+::-webkit-input-placeholder {
+   color: #6E7487;
+}
+
+input.red::-webkit-input-placeholder {
+  color: red;
+}
+
+.hidden {
+  display: none;
 }

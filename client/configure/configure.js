@@ -42,35 +42,42 @@
    */
 
   function save() {
-    var hostnames = $$('.hostnames .item span').map(function(el) {
-      return el.textContent.trim();
+    var sites = $$('.hostnames .item span').map(function(el) {
+      return {
+        pattern: el.dataset.pattern,
+        server: el.dataset.server,
+        port: el.dataset.port
+      };
     });
-    var port = $('input[name="port"').value.trim();
+    var port = $('input[name="default-port"').value.trim();
     triggerEvent('config_changed',{
       port: port,
-      hostnames: hostnames
+      sites: sites
     });
   }
 
   function load(config) {
     $('.hostnames').innerHTML = '';
-    config.hostnames.forEach(function(host) {
-      $('.hostnames').appendChild(createHostnameOption(host));
+    config.sites.forEach(function(site) {
+      $('.hostnames').appendChild(createHostnameOption(site));
     });
-    $('input[name="port"').value = config.port;
+    $('input[name="default-port"]').value = config.port;
   }
 
   /**
    * Templates.
    */
 
-  function createHostnameOption(val) {
+  function createHostnameOption(item) {
     var option = document.createElement('li');
     var text = document.createElement('span');
     var remove = document.createElement('a');
     remove.textContent = 'x';
     remove.classList.add('remove');
-    text.textContent = val;
+    text.textContent = item.pattern;
+    text.dataset.pattern = item.pattern;
+    text.dataset.port = item.port;
+    text.dataset.server = item.server;
     option.appendChild(text);
     option.appendChild(remove);
     option.classList.add('item');
@@ -83,6 +90,33 @@
     return div;
   }
 
+  function showHostnameForm(callback) {
+    var form = $('.hostname-form');
+    form.classList.remove('hidden');
+    form.querySelector('button').onclick = function() {
+      var pattern = form.querySelector('[name=pattern]').value.trim();
+      if (!pattern) {
+        form.querySelector('[name=pattern]').classList.add('red');
+        return;
+      }
+
+      var item = {
+        pattern: pattern,
+        server: form.querySelector('[name=server]').value.trim(),
+        port: form.querySelector('[name=port]').value.trim()
+      };
+
+      this.onclick = null;
+      form.classList.add('hidden');
+      $$('.hostname-form input').forEach(function(input) {
+        input.classList.remove('red');
+        input.value = '';
+      });
+
+      callback(item);
+    }
+  }
+
   /**
    * Event handlers.
    */
@@ -92,15 +126,11 @@
   };
 
   $('button.add').onclick = function () {
-    var hostname = prompt(
-      'Enter hostname pattern:'
-    );
-    if (!hostname) {
-      return;
-    }
-    var option = createHostnameOption(hostname);
-    $('.hostnames').appendChild(option);
-    save();
+    showHostnameForm(function(item) {
+      var option = createHostnameOption(item);
+      $('.hostnames').appendChild(option);
+      save();
+    });
   };
 
   $('.hostnames').onclick = function (e) {

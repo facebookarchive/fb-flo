@@ -30,17 +30,23 @@
       <form>
         <section>
           <div class="hostnames-container">
-            <label for="hostnames">Hostnames</label>
-            <p class="desc">Hostnames to start flo for. Could be either the full string to match or a regexp in the form of <code>/example\.com/gi</code>.</p>
+            <label for="hostnames">Sites</label>
+            <p class="desc">Sites to start flo for.</p>
             <div class="hostnames-options">
               <ol class="hostnames"></ol>
-              <button class="add">Add Hostname</button>
+              <button class="add">Add New Site</button>
+            </div>
+            <div class="hostname-form hidden">
+              <label>Add Site</label>
+              <div><input name="pattern" placeholder="* hostname pattern" title="Either the full string to match or a regexp in the form of /example\.com/gi." /></div>
+              <div><input name="server" placeholder="flo server hostname" /></div>
+              <div><input name="port" placeholder="flo server port" /> <button>Save</button></div>
             </div>
           </div>
           <div class="port-container">
-            <label for="port">Server port number:</label>
-            <p class="desc">The port number your flo server is listening on.</p>
-           <input name="port" />
+            <label for="default-port">Default flo server port number:</label>
+            <p class="desc">The default port number your flo server would be listening on (you can set port number per site).</p>
+           <input name="default-port" />
           </div>
         </section>
       </form>
