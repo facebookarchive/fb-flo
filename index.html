@@ -1,0 +1,168 @@
+<!doctype html>
+
+<html>
+  <head>
+    <style>
+    html{
+      font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+      font-weight:300;
+      color:#484848;
+      line-height:1.28;
+      background: #F1F1F1;
+    }
+    .wrap {
+      width: 600px;
+      margin: 0 auto;
+    }
+    .hero {
+      text-align: center;
+      font-size: 60px;
+      margin: 60px 0;
+      color: black;
+    }
+    .hero img {
+      width: 70px;
+      margin-bottom: -15px;
+      margin-right: -5px;
+    }
+    a {
+      text-decoration: none;
+      color: #317f99;
+    }
+    table {
+      width: 100%;
+      text-align: center;
+    }
+    table td:first-child {
+      text-align: left;
+    }
+    table, td, tr, th {
+      border: 1px solid #ddd;
+      border-collapse: collapse;
+      padding: 10px;
+    }
+    footer {
+      margin-top: 30px;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="hero">
+        <img src="logo.png" />
+        flo
+      </div>
+      <div class="about">
+        <h3>About</h3>
+        <p>
+          Flo is a web static resource live editing tool for Chrome that's easy to integrate with your dev environment.
+          <ul>
+            <li>Live edit JavaScript, CSS, Images and basically any static resource.</li>
+            <li>Works with your editor of your choice.</li>
+            <li>Easily integrates with your build step, no matter how complex.</li>
+            <li>Easily integrates with your dev environment.</li>
+            <li>Configurable and hackable.</li>
+          </ul>
+          <a href="https://github.com/facebook/flo#installation"><strong>Get started.</strong></a>
+        </p>
+      </div>
+      <div class="why">
+        <h3>Why another live edit tool?</h3>
+        <p>Live editing is awesome, it tightens the feedback loop between writing code and seeing the results, and by that it  makes it easier to get into flow and faster to try out new approaches and ideas.
+
+        When we set out to bring live coding to web developement at facebook we couldn't
+        find anything that works with our set of constraints:
+        <ul>
+          <li>We developed on remote machines</li>
+          <li>We had a complex build step</li>
+          <li>Everyone used a different editor</li>
+        </ul>
+
+        We needed something flexible to integrate with our dev environment. So we
+        created flo and were able to integrate it into our workflow within a day of
+        inception.
+        <br/><br/>
+        Here is how flo compares to some of the most popular projects in the space.
+        <br/><br/>
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>flo</th>
+              <th><a href="https://developers.google.com/chrome-developer-tools/docs/workspaces">Chrome Workspaces</a></th>
+              <th><a href="http://livestyle.emmet.io/">Emmet Livestyle</a></th>
+              <th><a href="http://livereload.com/">Live Reload</a></th>
+            </tr>
+          </thead>
+          <tbodY>
+            <tr>
+              <td>Live edit JS code</td>
+              <td>&#10003;</td>
+              <td>&#10003;</td>
+              <td>&#10007;</td>
+              <td>&#10007;</td>
+            </tr>
+            <tr>
+              <td>Live edit CSS code</td>
+              <td>&#10003;</td>
+              <td>&#10003;</td>
+              <td>&#10003;</td>
+              <td>&#10007;</td>
+            </tr>
+            <tr>
+              <td>Live edit images</td>
+              <td>&#10003;</td>
+              <td>&#10007;</td>
+              <td>&#10007;</td>
+              <td>&#10007;</td>
+            </tr>
+            <tr>
+              <td>Can reload</td>
+              <td>&#10003;</td>
+              <td>&#10007;</td>
+              <td>&#10003;</td>
+              <td>&#10003;</td>
+            </tr>
+            <tr>
+              <td>Build step support</td>
+              <td>&#10003;</td>
+              <td>limited*</td>
+              <td>&#10007;</td>
+              <td>&#10003;</td>
+            </tr>
+            <tr>
+              <td>Remote filesystem</td>
+              <td>&#10003;</td>
+              <td>&#10007;</td>
+              <td>&#10007;</td>
+              <td>&#10007;</td>
+            </tr>
+            <tr>
+              <td>Editor choice</td>
+              <td>&#10003;</td>
+              <td>limited*</td>
+              <td>&#10007;</td>
+              <td>&#10003;</td>
+            </tr>
+            <tr>
+              <td>Browser support</td>
+              <td>Chrome</td>
+              <td>Chrome</td>
+              <td>Chrome, Safari</td>
+              <td>All</td>
+            </tr>
+          </tbody>
+        </table>
+        <small>
+          <ul>
+            <li>Workspaces limited editor support: need to be on the sources tab and on the
+        same file being edited externally for it to work.</li>
+            <li>Workspaces limited support for build step: If sourcemaps are enabled then it will update
+        the file on the file system but not recompile it.</li>
+          </ul>
+      </small>
+      </div>
+    </div>
+    <footer><div class="wrap"><strong>&copy; 2014 Facebook Inc.</strong></div></footer>
+  </body>
+</html>
