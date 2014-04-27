@@ -140,6 +140,10 @@ section.tab.selected {
   display: flex;
 }
 
+section.tab > *{
+  flex-shrink: 0;
+}
+
 h1 {
   color: rgb(110, 116, 128);
   font-size: 16px;
@@ -249,8 +253,6 @@ input {
 }
 
 .status {
-  min-height: 60px;
-  margin: 10px 0;
 }
 
 .status .indicator {
