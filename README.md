@@ -3,13 +3,9 @@ flo
 
 Flo is a static resource live editing tool for Chrome that's easy to integrate with your dev environment.
 
-## Getting Started
+## Usage
 
-### 1. Install the extension
-
-[TODO publish and add link to chrome webstore]
-
-### 2. Configure flo server
+### 1. Configure flo server
 
 ```js
 var flo = require('flo');
@@ -20,28 +16,43 @@ var server = flo(
     port: 8888,
     host: 'localhost',
     verbose: false,
-    glob: ['./lib/**/*.js', './lib/**/*.css']
+    glob: ['*.js', '*.css']
   },
-  resolverCallback
+  function resolver(filepath, callback) {
+    // Update bundle.js and bundle.css when a JS or CSS file changes.
+    callback({
+      resourceURL: 'bundle.js' + path.extname(filepath),
+      content: fs.readFileSync(filepath)
+    });
+  }
 );
 ```
 
-* `dirToWatch` absolute or relative path to the directory to watch.
+A single function `flo` is exported and takes the following arguments:
+
+* `dirToWatch`: absolute or relative path to the directory to watch.
 * `options` hash of options:
     * `port` port to start the server on (defaults to 8888).
     * `host` to listen on.
-    * `verbose` be noisy
+    * `verbose` be noisy.
     * `glob` a glob string or array of globs to match against the files to watch.
-* `resolverCallback(filepath, callback)`: So a file with `filepath` has changed, this function is called to determine if and how we need to update the resource on the client.
-  * `filepath` path to the file that changed relative to the watched directory
-  * `callback` respond to the client with changed resource. A resource object should have the following properties:
-    * `resourceURL` the resource URL that will be used to identify the resource to update in the browser.
-    * `contents` the updated code.
-    * `reload` Forces a full page reload. Use this if you're sure the changed code cannot be hotswapped.
-    * `match` identifies the matching function to be performed on the resource URL in the browser. Could be one of the following:
-      * `"equal"` test the updated resource `resourceURL` against existing browser resources using an equality check.
-      * `"indexOf"` use `String.prototype.indexOf` check
-      * `/regexp/` a regexp object to exec.
+* `resolver` a function to map between files and resources.
+
+The resolver callback is called with two arguments:
+
+* `filepath` path to the file that changed relative to the watched directory.
+* `callback` called to update a resource file in the browser. Should be called with an object with the following properties:
+  * `resourceURL` used as an the resource identifier in the browser.
+  * `contents` the updated code.
+  * `reload` (optional) forces a full page reload. Use this if you're sure the changed code cannot be hotswapped.
+  * `match` (optional, defaults to: indexOf) identifies the matching function to be performed on the resource URL in the browser. Could be one of the following:
+    * `"equal"` test the updated resource `resourceURL` against existing browser resources using an equality check.
+    * `"indexOf"` use `String.prototype.indexOf` check
+    * `/regexp/` a regexp object to exec.
+
+### 2. Install the Chrome Extension
+
+Grab the [flo Chrome extension](https://chrome.google.com/webstore/detail/ahkfhobdidabddlalamkkiafpipdfchp). This will add a new tab in your Chrome DevTools called 'flo'.
 
 ### 3. Activate flo
 
