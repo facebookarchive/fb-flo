@@ -31,10 +31,7 @@
    * @private
    */
 
-  FloClient.prototype.saveConfig = function(config) {
-    if (config) {
-      this.config = config;
-    }
+  FloClient.prototype.saveConfig = function() {
     localStorage.setItem('flo-config', JSON.stringify(this.config));
   };
 
@@ -106,7 +103,8 @@
 
   FloClient.prototype.bindPanelEvents = function() {
     this.listenToPanel('config_changed', function(e) {
-      this.saveConfig(e.data);
+      this.config = e.data;
+      this.saveConfig();
       this.startNewSession();
     });
     this.listenToPanel('retry', this.startNewSession);
@@ -167,7 +165,7 @@
     var config = this.config;
     for (var i = 0; i < config.sites.length; i++) {
       var site = config.sites[i];
-      var pattern = site.pattern;
+      var pattern = parsePattern(site.pattern);
       var matched = false;
       if (pattern instanceof RegExp) {
         matched = pattern.exec(host);
@@ -193,10 +191,9 @@
     this.getLocation(
       function (host) {
         var site = this.getSite(host);
-        debugger;
         if (site) {
           this.session = new Session(
-            site.server,
+            site.server || host,
             site.port || this.config.port,
             this.status,
             this.logger
@@ -281,27 +278,32 @@
    */
 
   function loadConfig() {
-    var config;
+    var config = localStorage.getItem('flo-config');
     try {
-      config = JSON.parse(localStorage.getItem('flo-config'));
-    } catch (e) {
-      // Ignore parse error.
-    }
-    if (config) {
-      config.sites.forEach(function(item) {
-        var m = item.pattern.match(/^\/(.+)\/([gim]{0,3})$/);
-        if (m && m[1]) {
-          item.pattern = new RegExp(m[1], m[2]);
-        }
-      });
-    } else {
-      config = {
+      config = JSON.parse(config);
+    } catch (e) {} finally {
+      return config || {
         sites: [],
         port: 8888
       };
     }
+  }
 
-    return config;
+  /**
+   * Optionally parses config from JSON to an object.
+   * Also, parses patterns into regexp.
+   *
+   * @private
+   * @return {object}
+   */
+
+  function parsePattern(pattern) {
+    if (!pattern) return null;
+    var m = pattern.match(/^\/(.+)\/([gim]{0,3})$/);
+    if (m && m[1]) {
+      return new RegExp(m[1], m[2]);
+    }
+    return pattern;
   }
 
   // Start the app.
