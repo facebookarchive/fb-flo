@@ -1,7 +1,7 @@
 flo
 ---
 
-Flo is a static resource live editing tool for Chrome that's easy to integrate with your dev environment.
+Flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor.
 
 ## Usage
 
