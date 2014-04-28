@@ -49,6 +49,20 @@
     footer {
       margin-top: 30px;
     }
+    .checkmark {
+      color: #309b72;
+    }
+    .x {
+      color: #a64a34;
+    }
+    section {
+      margin: 40px 0;
+    }
+    section h3,
+    section h4,
+    footer {
+      color: #303030;
+    }
     </style>
   </head>
   <body>
@@ -57,7 +71,7 @@
         <img src="logo.png" />
         flo
       </div>
-      <div class="about">
+      <section class="about">
         <h3>About</h3>
         <p>
           Flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor.
@@ -68,14 +82,14 @@
             <li>Easily integrates with your dev environment.</li>
             <li>Configurable and hackable.</li>
           </ul>
-          <a href="https://github.com/facebook/flo#installation"><strong>Get started.</strong></a>
+          <a href="https://github.com/facebook/flo#usage"><strong>Get started.</strong></a>
         </p>
-      </div>
-      <div class="why">
+      </section>
+      <section class="why">
         <h3>Why another live edit tool?</h3>
-        <p>Live editing is awesome, it tightens the feedback loop between writing code and seeing the results, and makes it easier to get into flow and iterate faster on code.
+        <p>Live editing is awesome, it tightens the feedback loop between writing code and seeing the results, and makes it easy to get into flow and iterate faster on code.
 
-        When we set out to bring live coding to web developement at facebook we couldn't
+        When we set out to bring live coding to web developement at Facebook we couldn't
         find anything that works with our set of constraints:
         <ul>
           <li>We developed on remote machines</li>
@@ -102,52 +116,52 @@
           <tbodY>
             <tr>
               <td>Live edit JS code</td>
-              <td>&#10003;</td>
-              <td>&#10003;</td>
-              <td>&#10007;</td>
-              <td>&#10007;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="x">&#10007;</td>
+              <td class="x">&#10007;</td>
             </tr>
             <tr>
               <td>Live edit CSS code</td>
-              <td>&#10003;</td>
-              <td>&#10003;</td>
-              <td>&#10003;</td>
-              <td>&#10007;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="x">&#10007;</td>
             </tr>
             <tr>
               <td>Live edit images</td>
-              <td>&#10003;</td>
-              <td>&#10007;</td>
-              <td>&#10007;</td>
-              <td>&#10007;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="x">&#10007;</td>
+              <td class="x">&#10007;</td>
+              <td class="x">&#10007;</td>
             </tr>
             <tr>
               <td>Can reload</td>
-              <td>&#10003;</td>
-              <td>&#10007;</td>
-              <td>&#10003;</td>
-              <td>&#10003;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="x">&#10007;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="checkmark">&#10003;</td>
             </tr>
             <tr>
               <td>Build step support</td>
-              <td>&#10003;</td>
-              <td>limited*</td>
-              <td>&#10007;</td>
-              <td>&#10003;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="x">limited*</td>
+              <td class="x">&#10007;</td>
+              <td class="checkmark">&#10003;</td>
             </tr>
             <tr>
               <td>Remote filesystem</td>
-              <td>&#10003;</td>
-              <td>&#10007;</td>
-              <td>&#10007;</td>
-              <td>&#10007;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="x">&#10007;</td>
+              <td class="x">&#10007;</td>
+              <td class="x">&#10007;</td>
             </tr>
             <tr>
               <td>Editor choice</td>
-              <td>&#10003;</td>
-              <td>limited*</td>
-              <td>&#10007;</td>
-              <td>&#10003;</td>
+              <td class="checkmark">&#10003;</td>
+              <td class="x">limited*</td>
+              <td class="x">&#10007;</td>
+              <td class="checkmark">&#10003;</td>
             </tr>
             <tr>
               <td>Browser support</td>
@@ -166,8 +180,19 @@
         the file on the file system but not recompile it.</li>
           </ul>
       </small>
-      </div>
-    </div>
+      </section>
+      <section class="how">
+        <h3>How does it work?</h3>
+        <p>Flo is made up of a server and a client component.</p>
+
+        <h4>Server</h4>
+        <p>The server watches the source files for changes that are mapped into resources and sent to the client to update the running app. This gives flo the flexiblity to work with complex build systems. For example, say you use browserify to package JavaScript source files into a single bundle, and you also transform ES6 classes into ES5. In that case, when a JavaScript source file changes, you can compile and build your bundle and send it down to the client to update the running app. The server library is just an npm package that can be required and hacked however you like. Head over to the <a href="https://github.com/facebook/flo">Github project</a> to learn more.</p>
+
+        <h4>Client</h4>
+        <p>The client is currently a Chrome extension, and we do that to be able to recompile resources without reloading the page. So flo will actually live-patch the running code within the JavaScript VM. Same goes for CSS, and other resources. It connects to the flo server via a websocket connection. You can easily configure your server and port number, and can even have different addresses for each development site (web server hostname/port pairs).
+        </p>
+      </section>
+     </div>
     <footer><div class="wrap"><strong>&copy; 2014 Facebook Inc.</strong></div></footer>
   </body>
 </html>
