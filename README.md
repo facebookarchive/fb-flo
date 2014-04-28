@@ -5,7 +5,11 @@ Flo is a Chrome extension that lets you modify running apps without reloading. I
 
 ## Usage
 
+Flo is made up of a server and client component. This will guide through configuring your server for your project and installing the Chrome extension.
+
 ### 1. Configure flo server
+
+Flo exports a single `flo` function to start the server. Here is an example where you have your source JavaScript and CSS files in the root directory and your build step involves bundling both into a respective `bundle.js`, `bundle.css`.
 
 ```js
 var flo = require('flo');
@@ -19,7 +23,8 @@ var server = flo(
     glob: ['*.js', '*.css']
   },
   function resolver(filepath, callback) {
-    // Update bundle.js and bundle.css when a JS or CSS file changes.
+    // 1. Call into your compiler / bundler.
+    // 2. Update bundle.js and bundle.css when a JS or CSS file changes.
     callback({
       resourceURL: 'bundle.js' + path.extname(filepath),
       content: fs.readFileSync(filepath)
@@ -28,7 +33,7 @@ var server = flo(
 );
 ```
 
-A single function `flo` is exported and takes the following arguments:
+`flo` takes the following arguments.
 
 * `dirToWatch`: absolute or relative path to the directory to watch.
 * `options` hash of options:
