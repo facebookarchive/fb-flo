@@ -1,12 +1,10 @@
 {
   "name": "flo",
-  "version": "0.4",
-  "description": "hotswap fb js/css code",
+  "version": "0.5",
+  "description": "A static resource live editing tool for Chrome that's easy to integrate with your dev environment.",
   "devtools_page": "devtools.html",
   "manifest_version": 2,
   "permissions": [
     "*://*/"
-  ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-  "update_url": "http://home.fburl.com/~amasad/flo/updates.xml"
+  ]
 }
