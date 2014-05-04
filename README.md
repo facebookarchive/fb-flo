@@ -1,18 +1,18 @@
-flo
+fb-flo
 ---
 
-Flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor.
+fb-flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor.
 
 ## Usage
 
-Flo is made up of a server and client component. This will guide through configuring your server for your project and installing the Chrome extension.
+fb-flo is made up of a server and client component. This will guide through configuring your server for your project and installing the Chrome extension.
 
-### 1. Configure flo server
+### 1. Configure fb-flo server
 
-Flo exports a single `flo` function to start the server. Here is an example where you have your source JavaScript and CSS files in the root directory and your build step involves bundling both into a respective `bundle.js`, `bundle.css`.
+fb-flo exports a single `fb-flo` function to start the server. Here is an example where you have your source JavaScript and CSS files in the root directory and your build step involves bundling both into a respective `bundle.js`, `bundle.css`.
 
 ```js
-var flo = require('flo');
+var flo = require('fb-flo');
 
 var server = flo(
   dirToWatch,
@@ -57,14 +57,14 @@ The resolver callback is called with two arguments:
 
 ### 2. Install the Chrome Extension
 
-Grab the [flo Chrome extension](https://chrome.google.com/webstore/detail/ahkfhobdidabddlalamkkiafpipdfchp). This will add a new tab in your Chrome DevTools called 'flo'.
+Grab the [fb-flo Chrome extension](https://chrome.google.com/webstore/detail/ahkfhobdidabddlalamkkiafpipdfchp). This will add a new tab in your Chrome DevTools called 'fb-flo'.
 
-### 3. Activate flo
+### 3. Activate fb-flo
 
-To activate flo from the browser:
+To activate fb-flo from the browser:
 
 * Open Chrome DevTools.
-* Click on the new 'flo' pane.
+* Click on the new 'fb-flo' pane.
 * Click on 'Activate for this site'
 
 See screenshot:
@@ -73,10 +73,10 @@ See screenshot:
 
 ### Example
 
-Say you have a Makefile program that builds your JavaScript and CSS into `build/build.js` and `build/build.css` respectively, this how you'd configure your flo server:
+Say you have a Makefile program that builds your JavaScript and CSS into `build/build.js` and `build/build.css` respectively, this how you'd configure your fb-flo server:
 
 ```js
-var flo = require('flo');
+var flo = require('fb-flo');
 var fs = require('fs');
 var exec = require('child_process').exec;
 

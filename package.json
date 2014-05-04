@@ -1,7 +1,7 @@
 {
-  "name": "flo",
+  "name": "fb-flo",
   "version": "0.0.1",
-  "description": "Static resource hot swapping for Chrome",
+  "description": "Modify running web apps without reloading",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/mocha/bin/mocha ./test/**/*_test.js --bail"
