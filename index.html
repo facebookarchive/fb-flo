@@ -3,7 +3,7 @@
 <html>
   <head>
     <link rel="icon" type="image/png" href="favicon.png" />
-    <title>flo</title>
+    <title>fb-flo</title>
     <style>
     html{
       font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -71,12 +71,12 @@
     <div class="wrap">
       <div class="hero">
         <img src="logo.png" />
-        flo
+        fb-flo
       </div>
       <section class="about">
         <h3>About</h3>
         <p>
-          Flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor.
+          fb-flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor.
           <ul>
             <li>Live edit JavaScript, CSS, Images and basically any static resource.</li>
             <li>Works with your editor of your choice.</li>
@@ -84,7 +84,7 @@
             <li>Easily integrates with your dev environment.</li>
             <li>Configurable and hackable.</li>
           </ul>
-          <a href="https://github.com/facebook/flo#usage"><strong>Get started.</strong></a>
+          <a href="https://github.com/facebook/fb-flo#usage"><strong>Get started.</strong></a>
         </p>
       </section>
       <section class="why">
@@ -100,16 +100,16 @@
         </ul>
 
         We needed something flexible to integrate with our dev environment. So we
-        created flo and were able to integrate it into our workflow within a day of
+        created fb-flo and were able to integrate it into our workfb-flow within a day of
         inception.
         <br/><br/>
-        Here is how flo compares to some of the most popular live editing tools:
+        Here is how fb-flo compares to some of the most popular live editing tools:
         <br/><br/>
         <table>
           <thead>
             <tr>
               <th>Feature</th>
-              <th>flo</th>
+              <th>fb-flo</th>
               <th><a href="https://developers.google.com/chrome-developer-tools/docs/workspaces">Chrome Workspaces</a></th>
               <th><a href="http://livestyle.emmet.io/">Emmet Livestyle</a></th>
               <th><a href="http://livereload.com/">Live Reload</a></th>
@@ -185,13 +185,13 @@
       </section>
       <section class="how">
         <h3>How does it work?</h3>
-        <p>Flo is made up of a server and a client component.</p>
+        <p>fb-flo is made up of a server and a client component.</p>
 
         <h4>Server</h4>
-        <p>The server watches the source files for changes that are mapped into resources and sent to the client to update the running app. This gives flo the flexiblity to work with complex build systems. For example, say you use browserify to package JavaScript source files into a single bundle, and you also transform ES6 classes into ES5. In that case, when a JavaScript source file changes, you can compile and build your bundle and send it down to the client to update the running app. The server library is just an npm package that can be required and hacked however you like. Head over to the <a href="https://github.com/facebook/flo">Github project</a> to learn more.</p>
+        <p>The server watches the source files for changes that are mapped into resources and sent to the client to update the running app. This gives fb-flo the flexiblity to work with complex build systems. For example, say you use browserify to package JavaScript source files into a single bundle, and you also transform ES6 classes into ES5. In that case, when a JavaScript source file changes, you can compile and build your bundle and send it down to the client to update the running app. The server library is just an npm package that can be required and hacked however you like. Head over to the <a href="https://github.com/facebook/fb-flo">Github project</a> to learn more.</p>
 
         <h4>Client</h4>
-        <p>The client is currently a Chrome extension, and we do that to be able to recompile resources without reloading the page. So flo will actually live-patch the running code within the JavaScript VM. Same goes for CSS, and other resources. It connects to the flo server via a websocket connection. You can easily configure your server and port number, and can even have different addresses for each development site (web server hostname/port pairs).
+        <p>The client is currently a Chrome extension, and we do that to be able to recompile resources without reloading the page. So fb-flo will actually live-patch the running code within the JavaScript VM. Same goes for CSS, and other resources. It connects to the fb-flo server via a websocket connection. You can easily configure your server and port number, and can even have different addresses for each development site (web server hostname/port pairs).
         </p>
       </section>
      </div>
