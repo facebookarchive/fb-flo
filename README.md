@@ -9,6 +9,10 @@ fb-flo is made up of a server and client component. This will guide through conf
 
 ### 1. Configure fb-flo server
 
+```
+$ npm install fb-flo
+```
+
 fb-flo exports a single `fb-flo` function to start the server. Here is an example where you have your source JavaScript and CSS files in the root directory and your build step involves bundling both into a respective `bundle.js`, `bundle.css`.
 
 ```js
