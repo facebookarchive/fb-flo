@@ -7,5 +7,8 @@
   "permissions": [
     "*://*/",
     "storage"
-  ]
+  ],
+  "icons": {
+    "128": "logo.png"
+  }
 }
