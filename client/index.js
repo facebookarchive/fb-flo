@@ -7,7 +7,7 @@
  *  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-/*global Session:false, logger:false*/
+/*global Session:false, logger:false, chrome:false*/
 /* jshint evil:true */
 
 (function() {
@@ -21,16 +21,19 @@
    */
 
   function FloClient() {
-    this.config = loadConfig();
-    this.session = null;
-    this.panelWindow = null;
-    this.panelEventBuffer = [];
-    this.status = this.status.bind(this);
-    this.startNewSession = this.startNewSession.bind(this);
-    this.logger = Logger(this.triggerEvent.bind(this, 'log'));
-    this.log = this.logger('flo');
-    this.createPanel();
-    this.start();
+    var self = this;
+    loadConfig(function (config) {
+      self.config = config;
+      self.session = null;
+      self.panelWindow = null;
+      self.panelEventBuffer = [];
+      self.status = self.status.bind(self);
+      self.startNewSession = self.startNewSession.bind(self);
+      self.logger = Logger(self.triggerEvent.bind(self, 'log'));
+      self.log = self.logger('flo');
+      self.createPanel();
+      self.start();
+    });
   }
 
   /**
@@ -41,7 +44,7 @@
    */
 
   FloClient.prototype.saveConfig = function() {
-    localStorage.setItem('flo-config', JSON.stringify(this.config));
+    chrome.storage.local.set(this.config);
   };
 
   /**
@@ -286,16 +289,13 @@
    * @private
    */
 
-  function loadConfig() {
-    var config = localStorage.getItem('flo-config');
-    try {
-      config = JSON.parse(config);
-    } catch (e) {} finally {
-      return config || {
-        sites: [],
-        port: 8888
-      };
-    }
+  function loadConfig(done) {
+    chrome.storage.local.get(null, function (config) {
+      config = config || {};
+      config.sites = config.sites || [];
+      config.port = config.port || 8888;
+      done(config);
+    });
   }
 
   /**
