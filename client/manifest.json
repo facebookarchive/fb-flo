@@ -3,8 +3,9 @@
   "version": "0.6",
   "description": "Modify running web apps without reloading",
   "devtools_page": "devtools.html",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "permissions": [
-    "*://*/"
+    "*://*/",
+    "storage"
   ]
 }
