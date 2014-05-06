@@ -290,12 +290,25 @@
    */
 
   function loadConfig(done) {
-    chrome.storage.local.get(null, function (config) {
-      config = config || {};
-      config.sites = config.sites || [];
-      config.port = config.port || 8888;
-      done(config);
-    });
+    var config = loadLegacyConfig();
+    if (config) {
+      setTimeout(done.bind(null, config), 0);
+    } else {
+      chrome.storage.local.get(null, function (config) {
+        config = config || {};
+        config.sites = config.sites || [];
+        config.port = config.port || 8888;
+        done(config);
+      });
+    }
+  }
+
+  function loadLegacyConfig() {
+    var config = localStorage.getItem('flo-config');
+    localStorage.removeItem('flo-config');
+    try {
+      return JSON.parse(config);
+    } catch (e) {}
   }
 
   /**
