@@ -304,9 +304,10 @@
   }
 
   function loadLegacyConfig() {
-    var config = localStorage.getItem('flo-config');
-    localStorage.removeItem('flo-config');
+    var config;
     try {
+      config = localStorage.getItem('flo-config');
+      localStorage.removeItem('flo-config');
       return JSON.parse(config);
     } catch (e) {}
   }
