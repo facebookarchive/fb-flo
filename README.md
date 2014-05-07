@@ -16,7 +16,8 @@ $ npm install fb-flo
 fb-flo exports a single `fb-flo` function to start the server. Here is an example where you have your source JavaScript and CSS files in the root directory and your build step involves bundling both into a respective `bundle.js`, `bundle.css`.
 
 ```js
-var flo = require('fb-flo');
+var flo = require('fb-flo'),
+    path = require('path');
 
 var server = flo(
   dirToWatch,
