@@ -7,7 +7,7 @@
  *  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-/*global Session:false, logger:false, chrome:false*/
+/*global Session:false, logger:false*/
 /* jshint evil:true */
 
 (function() {
@@ -21,19 +21,16 @@
    */
 
   function FloClient() {
-    var self = this;
-    loadConfig(function (config) {
-      self.config = config;
-      self.session = null;
-      self.panelWindow = null;
-      self.panelEventBuffer = [];
-      self.status = self.status.bind(self);
-      self.startNewSession = self.startNewSession.bind(self);
-      self.logger = Logger(self.triggerEvent.bind(self, 'log'));
-      self.log = self.logger('flo');
-      self.createPanel();
-      self.start();
-    });
+    this.config = loadConfig();
+    this.session = null;
+    this.panelWindow = null;
+    this.panelEventBuffer = [];
+    this.status = this.status.bind(this);
+    this.startNewSession = this.startNewSession.bind(this);
+    this.logger = Logger(this.triggerEvent.bind(this, 'log'));
+    this.log = this.logger('flo');
+    this.createPanel();
+    this.start();
   }
 
   /**
@@ -44,7 +41,7 @@
    */
 
   FloClient.prototype.saveConfig = function() {
-    chrome.storage.local.set(this.config);
+    localStorage.setItem('flo-config', JSON.stringify(this.config));
   };
 
   /**
@@ -289,27 +286,16 @@
    * @private
    */
 
-  function loadConfig(done) {
-    var config = loadLegacyConfig();
-    if (config) {
-      setTimeout(done.bind(null, config), 0);
-    } else {
-      chrome.storage.local.get(null, function (config) {
-        config = config || {};
-        config.sites = config.sites || [];
-        config.port = config.port || 8888;
-        done(config);
-      });
-    }
-  }
-
-  function loadLegacyConfig() {
-    var config;
+  function loadConfig() {
+    var config = localStorage.getItem('flo-config');
     try {
-      config = localStorage.getItem('flo-config');
-      localStorage.removeItem('flo-config');
-      return JSON.parse(config);
-    } catch (e) {}
+      config = JSON.parse(config);
+    } catch (e) {} finally {
+      return config || {
+        sites: [],
+        port: 8888
+      };
+    }
   }
 
   /**
