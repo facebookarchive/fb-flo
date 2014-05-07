@@ -109,6 +109,5 @@ function resolver(filepath, callback) {
         })
       }
     });
-  }
-};
+}
 ```
