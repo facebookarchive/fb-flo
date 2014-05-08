@@ -32,7 +32,7 @@ var server = flo(
     // 2. Update bundle.js and bundle.css when a JS or CSS file changes.
     callback({
       resourceURL: 'bundle.js' + path.extname(filepath),
-      content: fs.readFileSync(filepath)
+      contents: fs.readFileSync(filepath)
     });
   }
 );
