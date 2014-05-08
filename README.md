@@ -20,16 +20,22 @@ var flo = require('fb-flo'),
     path = require('path');
 
 var server = flo(
-  dirToWatch,
+  sourceDirToWatch,
   {
     port: 8888,
     host: 'localhost',
     verbose: false,
-    glob: ['*.js', '*.css']
+    glob: [
+       // All JS files in `sourceDirToWatch` and subdirectories
+      '**/*.js',
+       // All CSS files in `sourceDirToWatch` and subdirectories
+      '**/*.css'
+    ]
   },
   function resolver(filepath, callback) {
     // 1. Call into your compiler / bundler.
-    // 2. Update bundle.js and bundle.css when a JS or CSS file changes.
+    // 2. Assuming that `bundle.js` is your output file, update `bundle.js`
+    //    and `bundle.css` when a JS or CSS file changes.
     callback({
       resourceURL: 'bundle.js' + path.extname(filepath),
       contents: fs.readFileSync(filepath)
@@ -40,11 +46,11 @@ var server = flo(
 
 `flo` takes the following arguments.
 
-* `dirToWatch`: absolute or relative path to the directory to watch.
+* `sourceDirToWatch`: absolute or relative path to the directory to watch that contains the source code that will be built.
 * `options` hash of options:
     * `port` port to start the server on (defaults to 8888).
     * `host` to listen on.
-    * `verbose` be noisy.
+    * `verbose` `true` or `false` value indicating if flo should be noisy.
     * `glob` a glob string or array of globs to match against the files to watch.
 * `resolver` a function to map between files and resources.
 
