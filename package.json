@@ -1,6 +1,6 @@
 {
   "name": "fb-flo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Modify running web apps without reloading",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "websocket": "~1.0.8",
-    "sane": "~0.3.0"
+    "sane": "~0.3.3"
   },
   "devDependencies": {
     "mocha": "~1.17.1"
