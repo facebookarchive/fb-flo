@@ -72,10 +72,10 @@
   FloClient.prototype.triggerEvent = function(type, data) {
     var event = new Event('flo_' + type);
     event.data = data;
+    // Save events for anytime we need to reinit the panel with prev state.
+    this.panelEventBuffer.push(event);
     if (this.panelWindow) {
       this.panelWindow.dispatchEvent(event);
-    } else {
-      this.panelEventBuffer.push(event);
     }
     return event;
   };
@@ -95,8 +95,11 @@
       'configure/configure.html',
       function (panel) {
         panel.onShown.addListener(function(panelWindow) {
-          self.panelWindow = panelWindow;
-          self.bindPanelEvents();
+          if (!panelWindow.wasShown) {
+            self.panelWindow = panelWindow;
+            self.initPanel();
+            panelWindow.wasShown = true;
+          }
         });
       }
     );
@@ -110,7 +113,7 @@
    * @private
    */
 
-  FloClient.prototype.bindPanelEvents = function() {
+  FloClient.prototype.initPanel = function() {
     this.listenToPanel('config_changed', function(e) {
       this.config = e.data;
       this.saveConfig();
@@ -121,7 +124,6 @@
     this.panelEventBuffer.forEach(function(event) {
       this.panelWindow.dispatchEvent(event);
     }, this);
-    this.panelEventBuffer = [];
     this.triggerEvent('load', this.config);
   };
 
