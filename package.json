@@ -1,6 +1,6 @@
 {
   "name": "fb-flo",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Modify running web apps without reloading",
   "main": "index.js",
   "scripts": {
