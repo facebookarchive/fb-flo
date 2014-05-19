@@ -52,6 +52,8 @@ var server = flo(
     * `host` to listen on.
     * `verbose` `true` or `false` value indicating if flo should be noisy.
     * `glob` a glob string or array of globs to match against the files to watch.
+    * `useFilePolling` some platforms that doesn't support native file watching, you can force the file watcher to work in polling mode.
+    * `pollingInterval` if in polling mode (useFilePolling) then you can set the interval at which to poll for file changes.
 * `resolver` a function to map between files and resources.
 
 The resolver callback is called with two arguments:
