@@ -8,9 +8,12 @@
  */
 
 var fs = require('fs');
+var mkdirp = require('mkdirp');
 var flo = require('../../');
 var assert = require('assert');
 var WebSocketClient = require('websocket').client;
+var path = require('path');
+var testDir = path.resolve('./tmp/flo_test');
 
 function client(connectFailed, connect, message) {
   var client = new WebSocketClient();
@@ -31,14 +34,10 @@ describe('flo(dir)', function() {
   var f;
 
   beforeEach(function(done) {
-    try {
-      fs.mkdirSync('/tmp/flo_test');
-    } catch (e) {
-      // don't care
-    }
-
-    fs.writeFileSync('/tmp/flo_test/foo.js', 'alert("wow")');
-    setTimeout(done, 300);
+    mkdirp(testDir, function (err) {
+      fs.writeFileSync(path.join(testDir,'foo.js'), 'alert("wow")');
+      setTimeout(done, 300);
+    });
   });
 
   afterEach(function() {
@@ -46,7 +45,7 @@ describe('flo(dir)', function() {
   });
 
   it('should start a server', function(done) {
-    f = flo('/tmp/flo_test');
+    f = flo(testDir);
     f.on('added', console.log)
     f.on('ready', function () {
       var c = client(
@@ -57,7 +56,7 @@ describe('flo(dir)', function() {
   });
 
   it('should send resource to the client when changed', function(done) {
-    f = flo('/tmp/flo_test');
+    f = flo(testDir);
     f.on('ready', function () {
       var c = client(
         done.bind(null, new Error('Failed to connect')),
@@ -71,13 +70,13 @@ describe('flo(dir)', function() {
           done();
         }
       );
-      fs.writeFileSync('/tmp/flo_test/foo.js', 'alert("hi")');
+      fs.writeFileSync(path.join(testDir,'foo.js'), 'alert("hi")');
     });
   });
 
   it('should work with css', function(done) {
-    fs.writeFileSync('/tmp/flo_test/bar.css', 'bar {color: red}');
-    f = flo('/tmp/flo_test');
+    fs.writeFileSync(path.join(testDir,'bar.css'), 'bar {color: red}');
+    f = flo(testDir);
     f.on('ready', function () {
       var c = client(
         done.bind(null, new Error('Failed to connect')),
@@ -91,12 +90,12 @@ describe('flo(dir)', function() {
           done();
         }
       );
-      fs.writeFileSync('/tmp/flo_test/bar.css', 'bar {color: blue}');
+      fs.writeFileSync(path.join(testDir,'bar.css'), 'bar {color: blue}');
     });
   });
 
   it('should send resource to multiple clients when changed', function(done) {
-    f = flo('/tmp/flo_test');
+    f = flo(testDir);
     f.on('ready', function () {
       var i = 0;
       function handler(connection) {
@@ -126,7 +125,7 @@ describe('flo(dir)', function() {
         handler
       );
 
-      fs.writeFileSync('/tmp/flo_test/foo.js', 'alert("hi")');
+      fs.writeFileSync(path.join(testDir,'foo.js'), 'alert("hi")');
     });
   });
 });
@@ -134,14 +133,11 @@ describe('flo(dir)', function() {
  describe('flo(dir, resolver)', function() {
   var f;
 
-  beforeEach(function() {
-    try {
-      fs.mkdirSync('/tmp/flo_test');
-    } catch (e) {
-      // don't care
-    }
-
-    fs.writeFileSync('/tmp/flo_test/foo.js', 'alert("wow")');
+  beforeEach(function(done) {
+      mkdirp(testDir, function (err) {
+          fs.writeFileSync(path.join(testDir,'foo.js'), 'alert("wow")');
+          setTimeout(done, 300);
+      });
   });
 
   afterEach(function() {
@@ -149,7 +145,7 @@ describe('flo(dir)', function() {
   });
 
   it('should work with a custom resolver', function(done) {
-    f = flo('/tmp/flo_test', function (filepath, callback) {
+    f = flo(testDir, function (filepath, callback) {
       assert.equal(filepath, 'foo.js');
       callback({
         contents: 'foobar',
@@ -171,13 +167,13 @@ describe('flo(dir)', function() {
         }
       );
 
-      fs.writeFileSync('/tmp/flo_test/foo.js', 'hmmmm');
+      fs.writeFileSync(path.join(testDir,'foo.js'), 'hmmmm');
     });
   });
 
   describe('resolver match property', function() {
     it('should serialize regexp objects', function(done) {
-      f = flo('/tmp/flo_test', function (filepath, callback) {
+      f = flo(testDir, function (filepath, callback) {
         assert.equal(filepath, 'foo.js');
         callback({
           contents: 'foobar',
@@ -206,7 +202,7 @@ describe('flo(dir)', function() {
           }
         );
 
-        fs.writeFileSync('/tmp/flo_test/foo.js', 'hmmmm');
+        fs.writeFileSync(path.join(testDir,'foo.js'), 'hmmmm');
       });
     });
   });
