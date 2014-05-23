@@ -52,7 +52,7 @@ var server = flo(
     * `host` to listen on.
     * `verbose` `true` or `false` value indicating if flo should be noisy.
     * `glob` a glob string or array of globs to match against the files to watch.
-    * `useFilePolling` some platforms that doesn't support native file watching, you can force the file watcher to work in polling mode.
+    * `useFilePolling` some platforms that do not support native file watching, you can force the file watcher to work in polling mode.
     * `pollingInterval` if in polling mode (useFilePolling) then you can set the interval at which to poll for file changes.
 * `resolver` a function to map between files and resources.
 
@@ -60,7 +60,7 @@ The resolver callback is called with two arguments:
 
 * `filepath` path to the file that changed relative to the watched directory.
 * `callback` called to update a resource file in the browser. Should be called with an object with the following properties:
-  * `resourceURL` used as an the resource identifier in the browser.
+  * `resourceURL` used as the resource identifier in the browser.
   * `contents` the updated code.
   * `reload` (optional) forces a full page reload. Use this if you're sure the changed code cannot be hotswapped.
   * `match` (optional, defaults to: indexOf) identifies the matching function to be performed on the resource URL in the browser. Could be one of the following:
