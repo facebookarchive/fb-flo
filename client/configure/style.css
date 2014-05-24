@@ -328,3 +328,7 @@ input.red::-webkit-input-placeholder {
 .hidden {
   display: none;
 }
+
+.report-bug {
+  font-size: 11px;
+}

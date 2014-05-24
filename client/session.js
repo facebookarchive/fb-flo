@@ -243,7 +243,7 @@
         this.logger.log('Resource update successful');
       } else {
         this.logger.error(
-          'flo failed to update, please report the following to amasad@fb.com ' +
+          'flo failed to update, this shouldn\'t happen please report it: ' +
             JSON.stringify(status)
         );
       }

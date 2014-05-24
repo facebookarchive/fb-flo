@@ -180,18 +180,26 @@
     load(e.data);
   });
 
+  var logs = '';
+
   listenToEvent('log', function(e) {
     var level = e.data[0];
     var args = e.data[1];
+    var message = args.map(function(a) {
+      return a.toString()
+    }).join(' ');
+
     var item = createLogItem(
       level,
-      args.map(function(a) {
-        return a.toString()
-      }).join(' ')
+      message
     );
-
     var box = $('.log-box');
     box.appendChild(item);
     box.scrollTop = box.scrollHeight;
+
+    logs += '\n' + '[' + level + ']' + message;
+    var report = $('.report-bug');
+    report.search = 'title=' + 'Report from extension'
+      + '&body=```' + logs + '\n```';
   });
 })();
