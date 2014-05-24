@@ -7,7 +7,7 @@
  *  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-/*global Connection:false,logger:false*/
+/*global Connection:false */
 
 (function () {
   'use strict';
@@ -67,7 +67,6 @@
     this.logger.log('Restarting');
     this.removeEventListeners();
     if (this.conn.connected()) {
-      logger.logInContext('flo running.');
       // No need to reconnect. We just refetch the resources.
       this.getResources(this.started.bind(this));
     } else {
@@ -147,7 +146,7 @@
     var self = this;
     this.conn = new Connection(this.host, this.port, this.createLogger)
       .onmessage(this.messageHandler)
-      .onerror(function (err) {
+      .onerror(function () {
         self.status('error');
       })
       .onopen(function () {
@@ -222,7 +221,7 @@
         var r = new RegExp(match.source, flags);
         matcher = r.exec.bind(r);
       } else {
-        this.logger.error('Unknown matcher object:', match)
+        this.logger.error('Unknown matcher object:', match);
         return;
       }
     }
@@ -259,7 +258,7 @@
 
   Session.prototype.destroy = function() {
     this.removeEventListeners();
-    this.conn && this.conn.disconnect();
+    if (this.conn) this.conn.disconnect();
   };
 
   /**
