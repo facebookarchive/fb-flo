@@ -7,7 +7,7 @@
  *  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-/*global Session:false, logger:false*/
+/*global Session:false */
 /* jshint evil:true */
 
 (function() {
@@ -27,8 +27,8 @@
     this.panelEventBuffer = [];
     this.status = this.status.bind(this);
     this.startNewSession = this.startNewSession.bind(this);
-    this.logger = Logger(this.triggerEvent.bind(this, 'log'));
-    this.log = this.logger('flo');
+    this.createLogger = Logger(this.triggerEvent.bind(this, 'log'));
+    this.loggger = this.createLogger('flo');
     this.createPanel();
     this.start();
   }
@@ -207,7 +207,7 @@
             site.server || host,
             site.port || this.config.port,
             this.status,
-            this.logger
+            this.createLogger
           );
           this.session.start();
         } else {

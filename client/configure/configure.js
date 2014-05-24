@@ -93,8 +93,9 @@
     return option;
   }
 
-  function createLogItem(str) {
+  function createLogItem(level, str) {
     var div = document.createElement('div');
+    div.classList.add('loglevel-' + level);
     div.textContent = str;
     return div;
   }
@@ -180,11 +181,15 @@
   });
 
   listenToEvent('log', function(e) {
+    var level = e.data[0];
+    var args = e.data[1];
     var item = createLogItem(
-      e.data.map(function(a) {
+      level,
+      args.map(function(a) {
         return a.toString()
       }).join(' ')
     );
+
     var box = $('.log-box');
     box.appendChild(item);
     box.scrollTop = box.scrollHeight;

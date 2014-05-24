@@ -7,8 +7,6 @@
  *  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-/*global logger:false*/
-
 (function() {
   'use strict';
 
@@ -41,11 +39,11 @@
    * @public
    */
 
-  function Connection(host, port, logger) {
+  function Connection(host, port, createLogger) {
     this.retries = RETRIES;
     this.host = host;
     this.port = port;
-    this.log = logger('connection');
+    this.logger = createLogger('connection');
     this.openHandler = this.openHandler.bind(this);
     this.messageHandler = this.messageHandler.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
@@ -75,7 +73,7 @@
     var ws = new WebSocket(url);
 
     this.callbacks.connecting();
-    this.log('Connecting to', url);
+    this.logger.log('Connecting to', url);
 
     ws.onopen = this.openHandler;
     ws.onmessage = this.messageHandler;
@@ -190,7 +188,7 @@
    */
 
   Connection.prototype.openHandler = function() {
-    this.log('Connected');
+    this.logger.log('Connected');
     this.callbacks.open();
     this.retries = RETRIES;
   };
@@ -204,14 +202,14 @@
    */
 
   Connection.prototype.closeHandler = function(evt) {
-    this.log('Failed to connect with', evt.reason, evt.code);
+    this.logger.error('Failed to connect with', evt.reason, evt.code);
     this.retries -= 1;
     if (this.retries < 1) {
       var err = new Error(evt.reason || 'Error connecting.');
       this.callbacks.error(err);
     } else {
       var delay = (RETRIES - this.retries) * DELAY;
-      this.log('Reconnecting in ', delay);
+      this.logger.log('Reconnecting in ', delay);
       this.callbacks.retry(delay);
       setTimeout(function () {
         this.connect();

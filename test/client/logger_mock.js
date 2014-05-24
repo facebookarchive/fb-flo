@@ -8,7 +8,8 @@
  */
 
 module.exports = function loggerMock() {
-  return function() {
-    return function() {};
+  return {
+    error: function(){},
+    log: function() {}
   }
 }

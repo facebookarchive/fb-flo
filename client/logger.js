@@ -14,10 +14,17 @@ this.Logger = (function() {
 
   function Logger(log) {
     return function(namespace) {
-      return function() {
-        var args = [].slice.call(arguments);
-        args[0] = '[' + namespace + '] ' + args[0];
-        return log(args);
+      return {
+        error: createLogLevel('error'),
+        log: createLogLevel('log')
+      };
+
+      function createLogLevel(level) {
+        return function () {
+          var args = [].slice.call(arguments);
+          args[0] = '[' + namespace + '] ' + args[0];
+          return log([level, args]);
+        };
       }
     };
   }

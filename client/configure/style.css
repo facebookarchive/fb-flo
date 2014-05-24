@@ -297,6 +297,10 @@ input {
   margin-bottom: 15px;
 }
 
+.log-box .loglevel-error {
+  color: #FF0000;
+}
+
 .hostnames-options, .hostname-form {
   float: left;
 }

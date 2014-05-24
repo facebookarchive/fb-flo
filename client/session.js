@@ -33,12 +33,12 @@
    * @public
    */
 
-  function Session(host, port, status, logger) {
+  function Session(host, port, status, createLogger) {
     this.host = host;
     this.port = port;
     this.status = status;
-    this.logger = logger;
-    this.log = logger('session');
+    this.createLogger = createLogger;
+    this.logger = createLogger('session');
     this.resources = null;
     this.conn = null;
     this.listeners = {};
@@ -53,7 +53,7 @@
    */
 
   Session.prototype.start = function() {
-    this.log('Starting flo for host', this.host);
+    this.logger.log('Starting flo for host', this.host);
     this.getResources(this.connect.bind(this, this.started));
   };
 
@@ -64,7 +64,7 @@
    */
 
   Session.prototype.restart = function() {
-    this.log('Restarting');
+    this.logger.log('Restarting');
     this.removeEventListeners();
     if (this.conn.connected()) {
       logger.logInContext('flo running.');
@@ -145,7 +145,7 @@
   Session.prototype.connect = function(callback) {
     callback = once(callback);
     var self = this;
-    this.conn = new Connection(this.host, this.port, this.logger)
+    this.conn = new Connection(this.host, this.port, this.createLogger)
       .onmessage(this.messageHandler)
       .onerror(function (err) {
         self.status('error');
@@ -171,7 +171,7 @@
    */
 
   Session.prototype.started = function() {
-    this.log('Started');
+    this.logger.log('Started');
     this.status('started');
     this.listen(
       chrome.devtools.network,
@@ -188,7 +188,7 @@
    */
 
   Session.prototype.messageHandler = function(updatedResource) {
-    this.log('Requested resource update', updatedResource.resourceURL);
+    this.logger.log('Requested resource update', updatedResource.resourceURL);
 
     if (updatedResource.reload) {
       chrome.devtools.inspectedWindow.reload();
@@ -204,7 +204,8 @@
       } else if (match === 'equal') {
         matcher = equalMatcher;
       } else {
-        throw new Error('Unknown match string option ' + match);
+        this.logger.error('Unknown match string option', match);
+        return;
       }
     } else if (match && typeof match === 'object') {
       if (match.type === 'regexp') {
@@ -221,7 +222,8 @@
         var r = new RegExp(match.source, flags);
         matcher = r.exec.bind(r);
       } else {
-        throw new Error('Unknown match object option');
+        this.logger.error('Unknown matcher object:', match)
+        return;
       }
     }
 
@@ -230,15 +232,19 @@
     })[0];
 
     if (!resource) {
-      throw new Error('Resource not found: ' + updatedResource.resourceURL);
+      this.logger.error(
+        'Resource with the following URL is not on the page:',
+        updatedResource.resourceURL
+      );
+      return;
     }
 
     resource.setContent(updatedResource.contents, true, function (status) {
       if (status.code === 'OK') {
-        this.log('Resource update successful');
+        this.logger.log('Resource update successful');
       } else {
-        this.log(
-          'flo failed to update, please report the following to amasad@fb.com' +
+        this.logger.error(
+          'flo failed to update, please report the following to amasad@fb.com ' +
             JSON.stringify(status)
         );
       }
