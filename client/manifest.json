@@ -1,6 +1,6 @@
 {
   "name": "fb-flo",
-  "version": "0.9",
+  "version": "0.11",
   "description": "Modify running web apps without reloading",
   "devtools_page": "devtools.html",
   "manifest_version": 2,
