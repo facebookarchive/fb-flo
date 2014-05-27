@@ -70,7 +70,7 @@ The resolver callback is called with two arguments:
 
 ### 2. Install the Chrome Extension
 
-Grab the [fb-flo Chrome extension](https://chrome.google.com/webstore/detail/ahkfhobdidabddlalamkkiafpipdfchp). This will add a new tab in your Chrome DevTools called 'fb-flo'.
+Grab the [fb-flo Chrome extension](https://chrome.google.com/webstore/detail/ahkfhobdidabddlalamkkiafpipdfchp). This will add a new tab in your Chrome DevTools called 'flo'.
 
 ### 3. Activate fb-flo
 
