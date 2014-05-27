@@ -241,6 +241,7 @@
     resource.setContent(updatedResource.contents, true, function (status) {
       if (status.code === 'OK') {
         this.logger.log('Resource update successful');
+        triggerReloadEvent(updatedResource);
       } else {
         this.logger.error(
           'flo failed to update, this shouldn\'t happen please report it: ' +
@@ -276,6 +277,21 @@
         return cb.apply(this, arguments);
       }
     };
+  }
+
+  function triggerReloadEvent(resource) {
+    var data = {
+      url: resource.resourceURL,
+      contents: resource.contents
+    };
+
+    var script = '(function() {' +
+      'var event = new Event(\'fb-flo-reload\');' +
+      'event.data = ' + JSON.stringify(data) + ';' +
+      'window.dispatchEvent(event);' +
+      '})()';
+
+    chrome.devtools.inspectedWindow.eval(script);
   }
 
   function indexOfMatcher(val, resourceURL) {

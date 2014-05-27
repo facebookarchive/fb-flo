@@ -165,6 +165,30 @@ describe('Session', function() {
         done();
       };
     });
+
+    it('should trigger an event when matched', function(done) {
+      chrome.devtools.inspectedWindow.eval = function(expr) {
+        assert(expr.match(/var event = new Event\('fb-flo-reload'\);/),
+          "event creation");
+        assert(expr.match(/event.data = \{"url":"http:\/\/w","contents":"foo"}/),
+          "event data");
+        assert(expr.match(/window.dispatchEvent\(event\);/),
+          "event dispatch");
+        done();
+      };
+
+      this.setContent = function(contents, bool, callback) {
+        callback({ code: 'OK' });
+      };
+
+      this.started = function() {
+        this.server.broadcast({
+          resourceURL: 'http://w',
+          match: 'indexOf',
+          contents: 'foo'
+        });
+      }.bind(this);
+    });
   });
 
 });
