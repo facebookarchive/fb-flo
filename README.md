@@ -17,7 +17,8 @@ fb-flo exports a single `fb-flo` function to start the server. Here is an exampl
 
 ```js
 var flo = require('fb-flo'),
-    path = require('path');
+    path = require('path'),
+    fs = require('fs');
 
 var server = flo(
   sourceDirToWatch,
@@ -38,6 +39,7 @@ var server = flo(
     //    and `bundle.css` when a JS or CSS file changes.
     callback({
       resourceURL: 'bundle.js' + path.extname(filepath),
+      // any string-ish value is acceptable. i.e. strings, Buffers etc.
       contents: fs.readFileSync(filepath)
     });
   }
@@ -61,7 +63,7 @@ The resolver callback is called with two arguments:
 * `filepath` path to the file that changed relative to the watched directory.
 * `callback` called to update a resource file in the browser. Should be called with an object with the following properties:
   * `resourceURL` used as the resource identifier in the browser.
-  * `contents` the updated code.
+  * `contents` any string-ish value representing the source of the updated file. i.e. strings, Buffers etc.
   * `reload` (optional) forces a full page reload. Use this if you're sure the changed code cannot be hotswapped.
   * `match` (optional, defaults to: indexOf) identifies the matching function to be performed on the resource URL in the browser. Could be one of the following:
     * `"equal"` test the updated resource `resourceURL` against existing browser resources using an equality check.
