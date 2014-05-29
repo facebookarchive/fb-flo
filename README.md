@@ -38,7 +38,7 @@ var server = flo(
     // 2. Assuming that `bundle.js` is your output file, update `bundle.js`
     //    and `bundle.css` when a JS or CSS file changes.
     callback({
-      resourceURL: 'bundle.js' + path.extname(filepath),
+      resourceURL: 'bundle' + path.extname(filepath),
       // any string-ish value is acceptable. i.e. strings, Buffers etc.
       contents: fs.readFileSync(filepath)
     });
@@ -91,9 +91,10 @@ See screenshot:
 Say you have a Makefile program that builds your JavaScript and CSS into `build/build.js` and `build/build.css` respectively, this how you'd configure your fb-flo server:
 
 ```js
-var flo = require('fb-flo');
-var fs = require('fs');
-var exec = require('child_process').exec;
+var flo = require('fb-flo'),
+    fs = require('fs'),
+    path = require('path'),
+    exec = require('child_process').exec;
 
 var server = flo('./lib/', {
   port: 8888,
@@ -108,17 +109,10 @@ server.once('ready', function() {
 function resolver(filepath, callback) {
     exec('make', function (err) {
       if (err) throw err;
-      if (filepath.match(/\.js$/)) {
-        callback({
-          resourceURL: 'build/build.js',
-          contents: fs.readFileSync('build/build.js').toString()
-        })
-      } else {
-        callback({
-          resourceURL: 'build/build.css',
-          contents: fs.readFileSync('build/build.css').toString()
-        })
-      }
+      callback({
+        resourceURL: 'build/build' + path.extname(filepath),
+        contents: fs.readFileSync('build/build' + path.extname(filepath)).toString()
+      })
     });
 }
 ```
