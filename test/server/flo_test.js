@@ -151,7 +151,7 @@ describe('flo(dir)', function() {
       assert.equal(filepath, 'foo.js');
       callback({
         contents: 'foobar',
-        resourceURL: 'customurl'
+        resourceURL: path.sep === '\\' ? 'custom\\url' : 'custom/url'
       });
     });
 
@@ -162,7 +162,7 @@ describe('flo(dir)', function() {
         function(msg) {
           assert.deepEqual(msg, {
             contents: 'foobar',
-            resourceURL: 'customurl',
+            resourceURL: 'custom/url',
             match: 'indexOf'
           });
           done();
