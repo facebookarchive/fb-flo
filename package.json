@@ -4,7 +4,7 @@
   "description": "Modify running web apps without reloading",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha ./test/**/*_test.js --bail"
+    "test": "mocha test/**/*_test.js --bail"
   },
   "author": "",
   "license": "BSD-2-Clause",
@@ -13,7 +13,6 @@
     "sane": "~0.4.0"
   },
   "devDependencies": {
-    "mkdirp": "^0.5.0",
     "mocha": "~1.17.1"
   },
   "bin": "./bin/flo"

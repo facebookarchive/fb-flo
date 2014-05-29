@@ -7,13 +7,15 @@
  *  of patent rights can be found in the PATENTS file in the same directory.
  */
 
+var os = require('os');
 var fs = require('fs');
-var mkdirp = require('mkdirp');
 var flo = require('../../');
 var assert = require('assert');
 var WebSocketClient = require('websocket').client;
 var path = require('path');
-var testDir = path.resolve('./tmp/flo_test');
+
+var tmpDir = os.tmpDir();
+var testDir = path.join(tmpDir, 'flo_test');
 
 function client(connectFailed, connect, message) {
   var client = new WebSocketClient();
@@ -34,7 +36,7 @@ describe('flo(dir)', function() {
   var f;
 
   beforeEach(function(done) {
-    mkdirp(testDir, function (err) {
+    fs.mkdir(testDir, function (err) {
       fs.writeFileSync(path.join(testDir,'foo.js'), 'alert("wow")');
       setTimeout(done, 300);
     });
@@ -134,7 +136,7 @@ describe('flo(dir)', function() {
   var f;
 
   beforeEach(function(done) {
-      mkdirp(testDir, function (err) {
+      fs.mkdir(testDir, function (err) {
           fs.writeFileSync(path.join(testDir,'foo.js'), 'alert("wow")');
           setTimeout(done, 300);
       });
