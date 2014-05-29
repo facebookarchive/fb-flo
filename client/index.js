@@ -21,16 +21,19 @@
    */
 
   function FloClient() {
-    this.config = loadConfig();
-    this.session = null;
-    this.panelWindow = null;
-    this.panelEventBuffer = [];
-    this.status = this.status.bind(this);
-    this.startNewSession = this.startNewSession.bind(this);
-    this.createLogger = Logger(this.triggerEvent.bind(this, 'log'));
-    this.loggger = this.createLogger('flo');
-    this.createPanel();
-    this.start();
+    var self = this;
+    loadConfig(function (config) {
+        self.config = config;
+        self.session = null;
+        self.panelWindow = null;
+        self.panelEventBuffer = [];
+        self.status = self.status.bind(self);
+        self.startNewSession = self.startNewSession.bind(self);
+        self.createLogger = Logger(self.triggerEvent.bind(self, 'log'));
+        self.loggger = self.createLogger('flo');
+        self.createPanel();
+        self.start();
+    });
   }
 
   /**
@@ -41,7 +44,11 @@
    */
 
   FloClient.prototype.saveConfig = function() {
-    localStorage.setItem('flo-config', JSON.stringify(this.config));
+      chrome.runtime.sendMessage({
+          name : 'localStorage:set',
+          key : 'fb_config',
+          data : JSON.stringify(this.config)
+      });
   };
 
   /**
@@ -283,21 +290,28 @@
   };
 
   /**
-   * Loads config from localstorage.
+   * Loads config from storage.
    *
    * @private
    */
 
-  function loadConfig() {
-    var config = localStorage.getItem('flo-config');
-    try {
-      config = JSON.parse(config);
-    } catch (e) {} finally {
-      return config || {
-        sites: [],
-        port: 8888
-      };
-    }
+  function loadConfig(cb) {
+      chrome.runtime.sendMessage({
+          name : 'localStorage:get',
+          key : 'fb_config'
+      }, function (config) {
+          try {
+              config = JSON.parse(config);
+          }
+          catch (ex) {
+              config = {};
+          }
+
+          config.sites = config.sites || [];
+          config.port = config.port || 8888;
+
+          cb(config);
+       });
   }
 
   /**
