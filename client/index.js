@@ -7,7 +7,7 @@
  *  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-/*global Session:false */
+/*global Session:false, chrome:true */
 /* jshint evil:true */
 
 (function() {
@@ -44,11 +44,11 @@
    */
 
   FloClient.prototype.saveConfig = function() {
-      chrome.runtime.sendMessage({
-          name : 'localStorage:set',
-          key : 'fb_config',
-          data : JSON.stringify(this.config)
-      });
+    chrome.runtime.sendMessage({
+      name : 'localStorage:set',
+      key : 'flo-config',
+      data : JSON.stringify(this.config)
+    });
   };
 
   /**
@@ -296,22 +296,22 @@
    */
 
   function loadConfig(cb) {
-      chrome.runtime.sendMessage({
-          name : 'localStorage:get',
-          key : 'fb_config'
-      }, function (config) {
-          try {
-              config = JSON.parse(config);
-          }
-          catch (ex) {
-              config = {};
-          }
+    chrome.runtime.sendMessage({
+      name : 'localStorage:get',
+      key : 'flo-config'
+    }, function (config) {
+      try {
+        config = JSON.parse(config);
+      }
+      catch (ex) {
+        config = {};
+	  }
 
-          config.sites = config.sites || [];
-          config.port = config.port || 8888;
+      config.sites = config.sites || [];
+      config.port = config.port || 8888;
 
-          cb(config);
-       });
+      cb(config);
+	});
   }
 
   /**
