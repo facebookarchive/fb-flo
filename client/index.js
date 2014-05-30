@@ -295,23 +295,45 @@
    * @private
    */
 
-  function loadConfig(cb) {
-    chrome.runtime.sendMessage({
-      name : 'localStorage:get',
-      key : 'flo-config'
-    }, function (config) {
-      try {
-        config = JSON.parse(config);
-      }
-      catch (ex) {
-        config = {};
+  function loadConfig(done) {
+		var config,
+			parseConfig = function (config) {
+				try {
+					config = JSON.parse(config);
+				}
+				catch (ex) {
+					config = {};
+				}
+
+				config.sites = config.sites || [];
+				config.port = config.port || 8888;
+
+				done(config);
+			};
+
+	  if ((config = loadLegacyConfig())) {
+	    window.setTimeout(parseConfig.bind(null, config), 0);
 	  }
+		else {
+	    chrome.runtime.sendMessage({
+	      name : 'localStorage:get',
+	      key : 'flo-config'
+	    }, parseConfig);
+		}
+  }
 
-      config.sites = config.sites || [];
-      config.port = config.port || 8888;
+  function loadLegacyConfig() {
+		var config = null;
 
-      cb(config);
-	});
+		try {
+			if (window.localStorage && window.localStorage.hasOwnProperty('flo-config')) {
+				config = window.localStorage.getItem('flo-config');
+				window.localStorage.removeItem('flo-config');
+			}
+		}
+		catch (ex) {}
+
+    return config;
   }
 
   /**
