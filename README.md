@@ -86,6 +86,8 @@ See screenshot:
 
 ![](http://i.imgur.com/SamY32i.png)
 
+After any resource is updated, the `fb-flo-reload` event will be triggered on the `window`. The event's data will contain the `url` and `contents` that were provided to the `callback` function on the `flo-server`.
+
 ### Example
 
 Say you have a Makefile program that builds your JavaScript and CSS into `build/build.js` and `build/build.css` respectively, this how you'd configure your fb-flo server:
