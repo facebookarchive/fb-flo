@@ -86,7 +86,13 @@ See screenshot:
 
 ![](http://i.imgur.com/SamY32i.png)
 
-After any resource is updated, the `fb-flo-reload` event will be triggered on the `window`. The event's data will contain the `url` and `contents` that were provided to the `callback` function on the `flo-server`.
+After any resource is updated, the `fb-flo-reload` event will be triggered on the `window`. The event's data will contain the `url` and `contents` that were provided to the `callback` function on the `flo-server`. Example:
+```js
+window.addEventListener('fb-flo-reload', function(ev) {
+    // perform additional steps here to reinitialize your application so it would take advantage of the new resource
+    console.log("Resource " + ev.data.url + " has just been replaced with this new content: " + ev.data.contents);
+});
+```
 
 ### Example
 
