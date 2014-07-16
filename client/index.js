@@ -23,16 +23,16 @@
   function FloClient() {
     var self = this;
     loadConfig(function (config) {
-        self.config = config;
-        self.session = null;
-        self.panelWindow = null;
-        self.panelEventBuffer = [];
-        self.status = self.status.bind(self);
-        self.startNewSession = self.startNewSession.bind(self);
-        self.createLogger = Logger(self.triggerEvent.bind(self, 'log'));
-        self.loggger = self.createLogger('flo');
-        self.createPanel();
-        self.start();
+      self.config = config;
+      self.session = null;
+      self.panelWindow = null;
+      self.panelEventBuffer = [];
+      self.status = self.status.bind(self);
+      self.startNewSession = self.startNewSession.bind(self);
+      self.createLogger = Logger(self.triggerEvent.bind(self, 'log'));
+      self.loggger = self.createLogger('flo');
+      self.createPanel();
+      self.start();
     });
   }
 
@@ -296,42 +296,42 @@
    */
 
   function loadConfig(done) {
-		var config,
-			parseConfig = function (config) {
-				try {
-					config = JSON.parse(config);
-				}
-				catch (ex) {
-					config = {};
-				}
+    var config,
+      parseConfig = function (config) {
+        try {
+          config = JSON.parse(config);
+        }
+        catch (ex) {
+          config = {};
+        }
 
-				config.sites = config.sites || [];
-				config.port = config.port || 8888;
+        config.sites = config.sites || [];
+        config.port = config.port || 8888;
 
-				done(config);
-			};
+        done(config);
+      };
 
-	  if ((config = loadLegacyConfig())) {
-	    window.setTimeout(parseConfig.bind(null, config), 0);
-	  }
-		else {
-	    chrome.runtime.sendMessage({
-	      name : 'localStorage:get',
-	      key : 'flo-config'
-	    }, parseConfig);
-		}
+    if ((config = loadLegacyConfig())) {
+      window.setTimeout(parseConfig.bind(null, config), 0);
+    }
+    else {
+      chrome.runtime.sendMessage({
+        name : 'localStorage:get',
+        key : 'flo-config'
+      }, parseConfig);
+    }
   }
 
   function loadLegacyConfig() {
-		var config = null;
+    var config = null;
 
-		try {
-			if (window.localStorage && window.localStorage.hasOwnProperty('flo-config')) {
-				config = window.localStorage.getItem('flo-config');
-				window.localStorage.removeItem('flo-config');
-			}
-		}
-		catch (ex) {}
+    try {
+      if (window.localStorage && window.localStorage.hasOwnProperty('flo-config')) {
+        config = window.localStorage.getItem('flo-config');
+        window.localStorage.removeItem('flo-config');
+      }
+    }
+    catch (ex) {}
 
     return config;
   }
