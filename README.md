@@ -69,6 +69,7 @@ The resolver callback is called with two arguments:
     * `"equal"` test the updated resource `resourceURL` against existing browser resources using an equality check.
     * `"indexOf"` use `String.prototype.indexOf` check
     * `/regexp/` a regexp object to exec.
+  * `update` (optional) a function that will be executed in the browser, immediately after the resource has been updated. This can be used to run custom code that updates your application. It receives the `window` and the `resourceURL` as parameters.
 
 ### 2. Install the Chrome Extension
 
