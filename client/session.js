@@ -285,6 +285,17 @@
       contents: resource.contents
     };
 
+    if ('string' === typeof resource.update) {
+      var updateFnStr = '(function() {' +
+        'try {' +
+          '(' + resource.update + ')(window, ' + JSON.stringify(resource.resourceURL) + ');' +
+          '} catch(ex) {' +
+            'console.error("There was an error while evaluating the update function. Make sure it meets the requirements!", ex);' +
+          '}' +
+        '})()';
+        chrome.devtools.inspectedWindow.eval(updateFnStr);
+    }
+
     var script = '(function() {' +
       'var event = new Event(\'fb-flo-reload\');' +
       'event.data = ' + JSON.stringify(data) + ';' +
