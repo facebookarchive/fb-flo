@@ -224,6 +224,9 @@
         this.logger.error('Unknown matcher object:', match);
         return;
       }
+    } else{
+      this.logger.error('Matcher object not specified');
+      return
     }
 
     var resource = this.resources.filter(function (res) {
@@ -238,17 +241,34 @@
       return;
     }
 
-    resource.setContent(updatedResource.contents, true, function (status) {
-      if (status.code === 'OK') {
-        this.logger.log('Resource update successful');
-        triggerReloadEvent(updatedResource);
-      } else {
-        this.logger.error(
-          'flo failed to update, this shouldn\'t happen please report it: ' +
-            JSON.stringify(status)
-        );
-      }
-    }.bind(this));
+    // If the resouce is HTML, setContent does not work.
+    // This hack set's the documents innerHTML instead.
+    if (resource.url.substr(resource.url.length - 4) === 'html') {
+      var script = "document.getElementsByTagName('html')[0].innerHTML = " +
+        JSON.stringify(updatedResource.contents) + ";";
+      
+      chrome.devtools.inspectedWindow.eval(script, function(result, err){
+        if(err) {
+          this.logger.error('Error updating html: ' + JSON.stringify(err));
+        } else{
+          this.logger.log('Resource update successful: ' + resource.url);
+          triggerReloadEvent(updatedResource);          
+        }
+      }.bind(this));
+    }else{
+      resource.setContent(updatedResource.contents, true, function (status) {
+        if (status.code === 'OK') {
+          this.logger.log('Resource update successful: ' + resource.url);
+          triggerReloadEvent(updatedResource);
+        } else {
+          this.logger.error(
+            'flo failed to update, this shouldn\'t happen please report it: ' +
+              JSON.stringify(status)
+          );
+        }
+      }.bind(this));
+    }
+    
   };
 
   /**
