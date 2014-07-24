@@ -290,7 +290,8 @@
         'try {' +
           '(' + resource.update + ')(window, ' + JSON.stringify(resource.resourceURL) + ');' +
           '} catch(ex) {' +
-            'console.error("There was an error while evaluating the update function. Make sure it meets the requirements!", ex);' +
+            'console.error("There was an error while evaluating the fb-flo update function. ' +
+            'Please check the function\'s code and review the README guidelines regarding it!", ex);' +
           '}' +
         '})()';
         chrome.devtools.inspectedWindow.eval(updateFnStr);
