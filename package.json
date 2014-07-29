@@ -6,6 +6,11 @@
   "scripts": {
     "test": "mocha test/**/*_test.js --bail"
   },
+  "repository" :
+  { 
+    "type" : "git",
+    "url" : "https://github.com/facebook/fb-flo.git"
+  },
   "author": "",
   "license": "BSD-2-Clause",
   "dependencies": {
