@@ -28,7 +28,7 @@
     this.status = this.status.bind(this);
     this.startNewSession = this.startNewSession.bind(this);
     this.createLogger = Logger(this.triggerEvent.bind(this, 'log'));
-    this.loggger = this.createLogger('flo');
+    this.logger = this.createLogger('flo');
     this.createPanel();
     this.start();
   }
@@ -159,7 +159,7 @@
 
   FloClient.prototype.getLocation = function(callback) {
     chrome.devtools.inspectedWindow['eval'](
-      'location.hostname',
+      'location.hostname || location.href',
       callback.bind(this)
     );
   };
