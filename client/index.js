@@ -166,7 +166,7 @@
 
   FloClient.prototype.getLocation = function(callback) {
     chrome.devtools.inspectedWindow['eval'](
-      'location.hostname',
+      'location.hostname || location.href',
       callback.bind(this)
     );
   };
