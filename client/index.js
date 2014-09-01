@@ -14,6 +14,12 @@
   'use strict';
 
   /**
+   * Constants
+   */
+
+  var FLO_CONFIG_KEY = 'flo-config';
+
+  /**
    * Flo client controller.
    *
    * @class FloClient
@@ -37,18 +43,14 @@
   }
 
   /**
-   * Save and optionally set new config.
+   * Save current config to disk.
    *
    * @param {object} config
    * @private
    */
 
   FloClient.prototype.saveConfig = function() {
-    chrome.runtime.sendMessage({
-      name : 'localStorage:set',
-      key : 'flo-config',
-      data : JSON.stringify(this.config)
-    });
+    saveConfig(this.config);
   };
 
   /**
@@ -290,48 +292,93 @@
   };
 
   /**
+   * Save passed in config object to disk.
+   *
+   * @param {object} config
+   * @private
+   */
+
+  function saveConfig(config) {
+    chrome.runtime.sendMessage({
+      name: 'localStorage:set',
+      key: FLO_CONFIG_KEY,
+      data: JSON.stringify(config)
+    });
+  }
+
+  /**
    * Loads config from storage.
    *
+   * @param {function} done
    * @private
    */
 
   function loadConfig(done) {
-    var config,
-      parseConfig = function (config) {
-        try {
-          config = JSON.parse(config);
-        }
-        catch (ex) {
-          config = {};
-        }
+    var configJSON = tryToLoadLegacyConfig();
 
-        config.sites = config.sites || [];
-        config.port = config.port || 8888;
-
-        done(config);
-      };
-
-    if ((config = loadLegacyConfig())) {
-      window.setTimeout(parseConfig.bind(null, config), 0);
+    if (configJSON) {
+      var config = parseConfig(configJSON);
+      // Persist new config to the new storage.
+      saveConfig(config);
+      setTimeout(done.bind(null, config), 0);
     }
     else {
-      chrome.runtime.sendMessage({
-        name : 'localStorage:get',
-        key : 'flo-config'
-      }, parseConfig);
+      chrome.runtime.sendMessage(
+        {
+          name : 'localStorage:get',
+          key : FLO_CONFIG_KEY
+        },
+        function (configJSON){
+          var config = parseConfig(configJSON);
+          done(config);
+        }
+      );
     }
   }
 
-  function loadLegacyConfig() {
+  /**
+   * Parses config and sets sensible defaults.
+   *
+   * @param {string} config
+   * @param {}
+   * @private
+   */
+
+  function parseConfig(configJSON) {
+    var config;
+
+    try {
+      config = JSON.parse(configJSON);
+    }
+    catch (ex) {
+      config = {};
+    }
+
+    config.sites = config.sites || [];
+    config.port = config.port || 8888;
+
+    return config;
+  }
+
+  /**
+   * Tries to load config from localstorage which was the old way of storing
+   * config and returns false if it fails.
+   *
+   * @return {string} config
+   * @private
+   */
+
+  function tryToLoadLegacyConfig() {;
     var config = null;
 
     try {
-      if (window.localStorage && window.localStorage.hasOwnProperty('flo-config')) {
-        config = window.localStorage.getItem('flo-config');
-        window.localStorage.removeItem('flo-config');
+      var config = window.localStorage && localStorage.getItem(FLO_CONFIG_KEY);
+      if (config) {
+        localStorage.removeItem(FLO_CONFIG_KEY);
       }
+    } catch (e) {
+      return false;
     }
-    catch (ex) {}
 
     return config;
   }
