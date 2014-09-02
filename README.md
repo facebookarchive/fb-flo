@@ -100,7 +100,9 @@ window.addEventListener('fb-flo-reload', function(ev) {
 });
 ```
 
-### Example
+### Examples
+
+#### Building before reloading
 
 Say you have a Makefile program that builds your JavaScript and CSS into `build/build.js` and `build/build.css` respectively, this how you'd configure your fb-flo server:
 
@@ -129,4 +131,40 @@ function resolver(filepath, callback) {
       })
     });
 }
+```
+
+#### Using the reload option
+
+You can use fb-flo for other file types using the attribute **reload** to reload page instead of hotswapping the code
+
+```js
+var flo = require('fb-flo'),
+    path = require('path'),
+    fs = require('fs');
+
+var server = flo(
+    './',
+    {
+        port: 8888,
+        host: 'localhost',
+        verbose: false,
+        glob: [
+            '**/*.css',
+            '**/*.js',
+            '**/*.php',
+            '**/*.html'
+        ]
+    },
+    function resolver(filepath, callback) {
+        callback({
+            resourceURL: path.basename(filepath),
+            // We reload the browser if any non CSS, non js code is updated
+            reload: !filepath.match(/\.(css|js)$/),
+            contents: fs.readFileSync(filepath),
+            update: function(window, resourceURL) {
+                console.log("Resource " + resourceURL + " has just been updated");
+            }
+        });
+    }
+);
 ```
