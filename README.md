@@ -51,6 +51,32 @@ var server = flo(
 );
 ```
 
+or integrate with exist server instance:
+
+```
+var express = require('express'),
+  app = express(),
+  http = require("http"),
+  server = http.createServer(app),
+  fs = require('fs')
+
+flo(PATH_TO_DIR,{
+    server:server,
+    glob:[
+      '**/*.css',
+      '**/*.html',
+      '**/*.jade'
+    ]},function( filePath, callback){
+      callback({
+        resourceURL : resourceURL,
+        contents : fs.readFileSync(path.join(root,filePath)),
+        update : function( _window,_resourceURL){
+        }
+      })
+    }
+  })
+```
+
 `flo` takes the following arguments.
 
 * `sourceDirToWatch`: absolute or relative path to the directory to watch that contains the source code that will be built.
