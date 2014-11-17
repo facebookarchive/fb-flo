@@ -1,7 +1,7 @@
 fb-flo
 ---
 
-fb-flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor.
+fb-flo is a Chrome extension that lets you modify running apps without reloading. It's easy to integrate with your build system, dev environment, and can be used with your favorite editor. Read more about it on [https://facebook.github.io/fb-flo/](https://facebook.github.io/fb-flo/)
 
 ## Usage
 
