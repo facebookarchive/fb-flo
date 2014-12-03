@@ -368,7 +368,7 @@
    * @private
    */
 
-  function tryToLoadLegacyConfig() {;
+  function tryToLoadLegacyConfig() {
     var config = null;
 
     try {
