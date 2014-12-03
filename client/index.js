@@ -372,7 +372,7 @@
     var config = null;
 
     try {
-      var config = window.localStorage && localStorage.getItem(FLO_CONFIG_KEY);
+      config = window.localStorage && localStorage.getItem(FLO_CONFIG_KEY);
       if (config) {
         localStorage.removeItem(FLO_CONFIG_KEY);
       }
