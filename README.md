@@ -59,8 +59,10 @@ var server = flo(
     * `host` to listen on.
     * `verbose` `true` or `false` value indicating if flo should be noisy.
     * `glob` a glob string or array of globs to match against the files to watch.
+    * `useWatchman` when watching a large number of folders or where watching is buggy you can use (watchman)[https://facebook.github.io/watchman/].
     * `useFilePolling` some platforms that do not support native file watching, you can force the file watcher to work in polling mode.
     * `pollingInterval` if in polling mode (useFilePolling) then you can set the interval (in milliseconds) at which to poll for file changes.
+    * `watchDotFiles` dot files are not watched by default.
 * `resolver` a function to map between files and resources.
 
 The resolver callback is called with two arguments:
