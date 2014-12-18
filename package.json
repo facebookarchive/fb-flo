@@ -14,7 +14,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "websocket": "~1.0.8",
-    "sane": "~1.0.0-rc1"
+    "sane": "~1.0.0"
   },
   "devDependencies": {
     "mocha": "~1.17.1"
