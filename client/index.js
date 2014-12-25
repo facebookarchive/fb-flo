@@ -36,7 +36,7 @@
       self.status = self.status.bind(self);
       self.startNewSession = self.startNewSession.bind(self);
       self.createLogger = Logger(self.triggerEvent.bind(self, 'log'));
-      self.loggger = self.createLogger('flo');
+      self.logger = self.createLogger('flo');
       self.createPanel();
       self.start();
     });
