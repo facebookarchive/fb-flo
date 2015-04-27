@@ -177,7 +177,29 @@
       'onNavigated',
       this.restart
     );
+    this.listen(
+        chrome.devtools.inspectedWindow,
+        'onResourceContentCommitted',
+        this.resourceUpdatedHandler
+    );
   };
+
+  /**
+   * Handle Resource Updated.
+   *
+   * @param {object} updatedResource
+   * @param {string} content
+   * @private
+   */
+
+    Session.prototype.resourceUpdatedHandler = function(updatedResource,content) {
+        this.logger.log('updating source', updatedResource.url);
+        this.conn.sendMessage({
+           action : 'update',
+           url : updatedResource.url,
+           content : content
+        });
+    };
 
   /**
    * Handler for messages from the server.
