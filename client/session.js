@@ -122,7 +122,7 @@
     chrome.devtools.inspectedWindow.getResources(function (resources) {
       
       resources.forEach(function(res){
-        if(url.length<250){
+        if(res.url.length<250){
           self.resources[res.url] = res;
         }
       });
