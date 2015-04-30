@@ -110,6 +110,21 @@
     }, this);
   };
 
+
+  /**
+   * Registers a resource.
+   *
+   * @param {function} res
+   * @private
+   */
+
+  Session.prototype.registerResource = function(res) {
+    if(res.url[0] == 'h'){
+       var url = res.url.split('?')[0].substr(0,250);
+       this.resources[url] = res;
+     }
+  };
+
   /**
    * Registers the resources and listens to onResourceAdded events.
    *
@@ -122,9 +137,7 @@
     chrome.devtools.inspectedWindow.getResources(function (resources) {
       
       resources.forEach(function(res){
-        if(res.url.length<250){
-          self.resources[res.url] = res;
-        }
+          self.registerResource(res);
       });
 
       self.url = resources[0].url;
@@ -135,7 +148,7 @@
         chrome.devtools.inspectedWindow,
         'onResourceAdded',
         function (res) {
-          self.resources[res.url] = res;
+          self.registerResource(res);
         }
       );
       callback();
