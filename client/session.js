@@ -39,7 +39,8 @@
     this.status = status;
     this.createLogger = createLogger;
     this.logger = createLogger('session');
-    this.resources = null;
+    this.resources = [];
+    this.url = null;
     this.conn = null;
     this.listeners = {};
     this.messageHandler = this.messageHandler.bind(this);
@@ -119,7 +120,14 @@
   Session.prototype.getResources = function(callback) {
     var self = this;
     chrome.devtools.inspectedWindow.getResources(function (resources) {
-      self.resources = resources;
+      
+      resources.forEach(function(res){
+        if(url.length<250){
+          self.resources[res.url] = res;
+        }
+      });
+
+      self.url = resources[0].url;
       // After we register the current resources, we listen to the
       // onResourceAdded event to push on more resources lazily fetched
       // to our array.
@@ -127,7 +135,7 @@
         chrome.devtools.inspectedWindow,
         'onResourceAdded',
         function (res) {
-          self.resources.push(res);
+          self.resources[res.url] = res;
         }
       );
       callback();
@@ -172,6 +180,12 @@
   Session.prototype.started = function() {
     this.logger.log('Started');
     this.status('started');
+    if(this.conn && this.url){
+      this.conn.sendMessage({
+           action : 'baseUrl',
+           url : this.url
+        });
+    }
     this.listen(
       chrome.devtools.network,
       'onNavigated',
@@ -216,43 +230,9 @@
       return;
     }
 
-    var match = updatedResource.match;
-    var matcher;
-
-    if (typeof match === 'string') {
-      if (match === 'indexOf') {
-        matcher = indexOfMatcher;
-      } else if (match === 'equal') {
-        matcher = equalMatcher;
-      } else {
-        this.logger.error('Unknown match string option', match);
-        return;
-      }
-    } else if (match && typeof match === 'object') {
-      if (match.type === 'regexp') {
-        var flags = '';
-        if (match.ignoreCase) {
-          flags += 'i';
-        }
-        if (match.multiline) {
-          flags += 'm';
-        }
-        if (match.global) {
-          flags += 'g';
-        }
-        var r = new RegExp(match.source, flags);
-        matcher = r.exec.bind(r);
-      } else {
-        this.logger.error('Unknown matcher object:', match);
-        return;
-      }
-    }
-
-    var resource = this.resources.filter(function (res) {
-      return matcher(res.url, updatedResource.resourceURL);
-    })[0];
-
-    if (!resource) {
+    if(this.resources[updatedResource.resourceURL] !== undefined){
+      var resource = this.resources[updatedResource.resourceURL];
+    }else{
       this.logger.error(
         'Resource with the following URL is not on the page:',
         updatedResource.resourceURL
