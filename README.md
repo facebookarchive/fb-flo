@@ -115,10 +115,6 @@ var server = flo('./lib/', {
   glob: ['./lib/**/*.js', './lib/**/*.css']
 }, resolver);
 
-server.once('ready', function() {
-  console.log('Ready!');
-});
-
 function resolver(filepath, callback) {
     exec('make', function (err) {
       if (err) throw err;
@@ -128,4 +124,26 @@ function resolver(filepath, callback) {
       })
     });
 }
+
+server.once('ready', function() {
+  console.log('Ready!');
+});
+
+// when we update file in the browser editor, we update the  original source file
+server.on('update', function(message) {
+
+    server.stopWatching(function() {
+
+        var sourceFilePath = message.url.replace(server.getClientHostname(), '');
+              
+        fs.writeFile(sourceFilePath, message.content, function() {
+              setTimeout(function(){
+                  server.watch();
+              }, 100);
+        });
+
+    });
+
+});
+
 ```
