@@ -72,10 +72,7 @@ The resolver callback is called with two arguments:
   * `resourceURL` used as the resource identifier in the browser.
   * `contents` any string-ish value representing the source of the updated file. i.e. strings, Buffers etc.
   * `reload` (optional) forces a full page reload. Use this if you're sure the changed code cannot be hotswapped.
-  * `match` (optional, defaults to: indexOf) identifies the matching function to be performed on the resource URL in the browser. Could be one of the following:
-    * `"equal"` test the updated resource `resourceURL` against existing browser resources using an equality check.
-    * `"indexOf"` use `String.prototype.indexOf` check
-    * `/regexp/` a regexp object to exec.
+  * `hostname` (optional) used as the resource hostname in the browser (exemple :`http://localhost/` ).
   * `update` (optional) a function that will be executed in the browser, immediately after the resource has been updated. This can be used to run custom code that updates your application. It receives the `window` and the `resourceURL` as parameters. This function will be stringified so it could be sent to the client. Make sure you don't use any variables defined outside this function, as they won't be available, and you will get an error.
 
 ### 2. Install the Chrome Extension
