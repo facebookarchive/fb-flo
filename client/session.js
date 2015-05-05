@@ -119,7 +119,8 @@
    */
 
   Session.prototype.registerResource = function(res) {
-    if(res.url[0] == 'h'){
+    // exclude ressource that are data
+    if(res.url.substr(0,4) !== 'data'){
        var url = res.url.split('?')[0].substr(0,250);
        this.resources[url] = res;
      }
