@@ -42,6 +42,7 @@
     this.resources = null;
     this.conn = null;
     this.listeners = {};
+    this.openedSources = {};
     this.messageHandler = this.messageHandler.bind(this);
     this.started = this.started.bind(this);
   }
@@ -238,17 +239,31 @@
       return;
     }
 
-    resource.setContent(updatedResource.contents, true, function (status) {
-      if (status.code === 'OK') {
-        this.logger.log('Resource update successful');
-        triggerReloadEvent(updatedResource);
-      } else {
-        this.logger.error(
-          'flo failed to update, this shouldn\'t happen please report it: ' +
-            JSON.stringify(status)
-        );
-      }
-    }.bind(this));
+    var setContent = function() {
+      resource.setContent(updatedResource.contents, true, function (status) {
+        if (status.code === 'OK') {
+          this.logger.log('Resource update successful');
+          triggerReloadEvent(updatedResource);
+        } else {
+          this.logger.error(
+            'flo failed to update, this shouldn\'t happen please report it: ' +
+              JSON.stringify(status)
+          );
+        }
+      }.bind(this));
+    }.bind(this);
+
+    if (!this.openedSources[resource.url]) {
+      this.openedSources[resource.url] = true;
+      chrome.devtools.panels.openResource(resource.url, null, function() {
+
+        // doesn't always work right away
+        setTimeout(setContent, 100);
+      });
+    } else {
+      setContent();
+    }
+
   };
 
   /**
