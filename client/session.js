@@ -136,7 +136,7 @@
   Session.prototype.getResources = function(callback) {
     var self = this;
     chrome.devtools.inspectedWindow.getResources(function (resources) {
-      
+
       resources.forEach(function(res){
           self.registerResource(res);
       });
@@ -254,17 +254,42 @@
       return;
     }
 
-    resource.setContent(updatedResource.contents, true, function (status) {
-      if (status.code === 'OK') {
-        this.logger.log('Resource update successful');
-        triggerReloadEvent(updatedResource);
-      } else {
-        this.logger.error(
-          'flo failed to update, this shouldn\'t happen please report it: ' +
-            JSON.stringify(status)
-        );
-      }
-    }.bind(this));
+    if(updatedResource.commit === undefined){
+        updatedResource.commit = true;
+    }
+
+    // if updatedResource send by part
+    if(updatedResource.part !== undefined){
+
+     if(resource.part === undefined){
+        resource.part = [];
+     }
+     // store each part
+     resource.part.push(updatedResource.part);
+
+    }else {
+        // concat all parts
+        if (resource.part !== undefined){
+            resource.part.push(updatedResource.contents);
+            updatedResource.contents = resource.part.join('');
+            delete resource.part;
+        }
+
+        // update the resource
+        resource.setContent(updatedResource.contents, updatedResource.commit, function (status) {
+          if (status.code === 'OK') {
+            this.logger.log('Resource update successful',updatedResource.commit);
+            triggerReloadEvent(updatedResource);
+          } else {
+            this.logger.error(
+              'flo failed to update, this shouldn\'t happen please report it: ' +
+                JSON.stringify(status)
+            );
+          }
+
+        }.bind(this));
+    }
+
   };
 
   /**
