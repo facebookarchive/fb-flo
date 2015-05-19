@@ -40,6 +40,7 @@
     this.createLogger = createLogger;
     this.logger = createLogger('session');
     this.resources = [];
+    this.devResources = [];
     this.url = null;
     this.conn = null;
     this.listeners = {};
@@ -120,14 +121,14 @@
 
   Session.prototype.registerResource = function(res) {
     // exclude ressource that are data
-    if(res.url.substr(0,4) !== 'data'){
+    if(res.url.substr(0,4) !== 'data' ){
        var url = res.url.split('?')[0];
-       this.resources[url] = res;
-         var script = '(function() {' +
-      'console.log("[fb-flo] '+url+' '+res.type+' added ");' +
-      '})()';
 
-       chrome.devtools.inspectedWindow.eval(script);
+        if(url.indexOf('/dev/')>0){
+            this.devResources[url] = res;
+        }else{
+           this.resources[url] = res;
+        }
      }
   };
 
@@ -142,11 +143,13 @@
     var self = this;
     chrome.devtools.inspectedWindow.getResources(function (resources) {
 
+      self.url = resources[0].url;
+
       resources.forEach(function(res){
           self.registerResource(res);
       });
 
-      self.url = resources[0].url;
+      
       // After we register the current resources, we listen to the
       // onResourceAdded event to push on more resources lazily fetched
       // to our array.
@@ -226,9 +229,10 @@
    */
     Session.prototype.resourceUpdatedHandler = function(updatedResource,content) {
 
-      this.logger.log('res : '+JSON.stringify(this.resources[updatedResource.url]));
-
-      if(this.resources[updatedResource.url].browser === undefined ){
+   
+      if(this.devResources[updatedResource.url]!== undefined ){
+          
+      }else if(this.resources[updatedResource.url].browser !== undefined ){
 
         this.logger.log('updating source file');
       
@@ -237,9 +241,14 @@
              url : updatedResource.url,
              content : content
         });
+
       }
-     
-      
+
+       var script = '(function() {' +
+          'console.log("[fb-flo] '+updatedResource.url+'  updating ...");' +
+          '})()';
+
+          chrome.devtools.inspectedWindow.eval(script);
 
     };
 
@@ -269,6 +278,9 @@
 
       if(this.resources[updatedResource.resourceURL] !== undefined){
         var resource = this.resources[updatedResource.resourceURL];
+      }else if(this.devResources[updatedResource.resourceURL] !== undefined){
+        var resource = this.devResources[updatedResource.resourceURL];
+        resource.browser = true;
       }else{
         this.logger.error(
           'Resource with the following URL is not on the page:',
@@ -277,20 +289,9 @@
         return;
       }
 
-
-      var commit = true;
-
-      if(updatedResource.commit !== undefined){
-          commit = updatedResource.commit;    
-       }
-
-      if(updatedResource.browser !== undefined){
-          resource.browser = updatedResource.browser;    
-       }
-
-        if(updatedResource.resourceName !== undefined){
+      if(updatedResource.resourceName !== undefined){
           resource.resourceName = updatedResource.resourceName;    
-       }
+      }
 
       // if updatedResource send by part
       if(updatedResource.part !== undefined){
@@ -310,7 +311,7 @@
           }
 
           // update the resource
-          return resource.setContent(updatedResource.contents, commit, function (status) {
+          return resource.setContent(updatedResource.contents, true, function (status) {
             if (status.code === 'OK') {
               this.logger.log(updatedResource.resourceURL+' is up to date (commit '+commit+') ');
               this.triggerReloadEvent(updatedResource);
@@ -360,7 +361,6 @@
       contents: resource.contents
     };
 
-    this.logger.log('triggerReloadEvent', typeof resource.update);
 
     if( typeof resource.resourceName == 'string'){
 
@@ -371,10 +371,6 @@
 
        chrome.devtools.inspectedWindow.eval(script);
 
-    }
-
-    if(resource.browser !== undefined){
-      delete resource.browser;
     }
 
     if ('string' === typeof resource.update) {
