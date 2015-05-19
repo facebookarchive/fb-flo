@@ -219,14 +219,32 @@
    * @param {string} content
    * @private
    */
-
     Session.prototype.resourceUpdatedHandler = function(updatedResource,content) {
-        this.logger.log('updating source', updatedResource.url);
-        this.conn.sendMessage({
-           action : 'update',
-           url : updatedResource.url,
-           content : content
+
+      this.logger.log('browser : ',JSON.stringify(updatedResource));
+     
+      this.logger.log('browser undefined',(this.resources[updatedResource.url].browser === undefined));
+      if(this.resources[updatedResource.url].browser === undefined && updatedResource.browser === undefined){
+
+      this.logger.log('update server');
+      
+       this.conn.sendMessage({
+             action : 'update',
+             url : updatedResource.url,
+             content : content
         });
+
+  
+
+     }else{
+
+      updatedResource.browser = this.resources[updatedResource.url].browser;
+
+     }
+
+      this.logger.log('res',JSON.stringify(this.resources[updatedResource.url]));
+
+
     };
 
   /**
@@ -237,59 +255,69 @@
    */
 
   Session.prototype.messageHandler = function(updatedResource) {
-    this.logger.log('Requested resource update', updatedResource.resourceURL);
-
-    if (updatedResource.reload) {
-      chrome.devtools.inspectedWindow.reload();
-      return;
-    }
-
-    if(this.resources[updatedResource.resourceURL] !== undefined){
-      var resource = this.resources[updatedResource.resourceURL];
+    if(updatedResource.action !==  undefined){
+      if(updatedResource.action == 'baseUrl' && this.conn && this.url){
+        this.conn.sendMessage({
+             action : 'baseUrl',
+             url : this.url
+          });
+      } 
     }else{
-      this.logger.error(
-        'Resource with the following URL is not on the page:',
-        updatedResource.resourceURL
-      );
-      return;
-    }
 
-    if(updatedResource.commit === undefined){
-        updatedResource.commit = true;
-    }
+      this.logger.log('push', updatedResource.resourceURL);
 
-    // if updatedResource send by part
-    if(updatedResource.part !== undefined){
+      if (updatedResource.reload) {
+        chrome.devtools.inspectedWindow.reload();
+        return;
+      }
 
-     if(resource.part === undefined){
-        resource.part = [];
-     }
-     // store each part
-     resource.part.push(updatedResource.part);
+      if(this.resources[updatedResource.resourceURL] !== undefined){
+        var resource = this.resources[updatedResource.resourceURL];
+      }else{
+        this.logger.error(
+          'Resource with the following URL is not on the page:',
+          updatedResource.resourceURL
+        );
+        return;
+      }
 
-    }else {
-        // concat all parts
-        if (resource.part !== undefined){
-            resource.part.push(updatedResource.contents);
-            updatedResource.contents = resource.part.join('');
-            delete resource.part;
-        }
+      if(updatedResource.browser !== undefined){
+          resource.browser = updatedResource.browser;    
+       }
+      // if updatedResource send by part
+      if(updatedResource.part !== undefined){
 
-        // update the resource
-        resource.setContent(updatedResource.contents, updatedResource.commit, function (status) {
-          if (status.code === 'OK') {
-            this.logger.log('Resource update successful',updatedResource.commit);
-            triggerReloadEvent(updatedResource);
-          } else {
-            this.logger.error(
-              'flo failed to update, this shouldn\'t happen please report it: ' +
-                JSON.stringify(status)
-            );
+       if(resource.part === undefined){
+          resource.part = [];
+       }
+       // store each part
+       resource.part.push(updatedResource.part);
+
+      }else {
+          // concat all parts
+          if (resource.part !== undefined){
+              resource.part.push(updatedResource.contents);
+              updatedResource.contents = resource.part.join('');
+              delete resource.part;
           }
 
-        }.bind(this));
-    }
+          // update the resource
+          return resource.setContent(updatedResource.contents, true, function (status) {
+            if (status.code === 'OK') {
+              this.logger.log('Resource update successful');
+              triggerReloadEvent(updatedResource);
 
+              delete resource.browser;
+
+            } else {
+              this.logger.error(
+                'flo failed to update, this shouldn\'t happen please report it: ' +
+                  JSON.stringify(status)
+              );
+            }
+          }.bind(this));
+      }
+    }
   };
 
   /**
