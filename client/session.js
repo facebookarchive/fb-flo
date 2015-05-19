@@ -123,6 +123,11 @@
     if(res.url.substr(0,4) !== 'data'){
        var url = res.url.split('?')[0];
        this.resources[url] = res;
+         var script = '(function() {' +
+      'console.log("[fb-flo] '+url+' '+res.type+' added ");' +
+      '})()';
+
+       chrome.devtools.inspectedWindow.eval(script);
      }
   };
 
@@ -221,29 +226,20 @@
    */
     Session.prototype.resourceUpdatedHandler = function(updatedResource,content) {
 
-      this.logger.log('browser : ',JSON.stringify(updatedResource));
-     
-      this.logger.log('browser undefined',(this.resources[updatedResource.url].browser === undefined));
-      if(this.resources[updatedResource.url].browser === undefined && updatedResource.browser === undefined){
+      this.logger.log('res : '+JSON.stringify(this.resources[updatedResource.url]));
 
-      this.logger.log('update server');
+      if(this.resources[updatedResource.url].browser === undefined ){
+
+        this.logger.log('updating source file');
       
-       this.conn.sendMessage({
+        this.conn.sendMessage({
              action : 'update',
              url : updatedResource.url,
              content : content
         });
-
-  
-
-     }else{
-
-      updatedResource.browser = this.resources[updatedResource.url].browser;
-
-     }
-
-      this.logger.log('res',JSON.stringify(this.resources[updatedResource.url]));
-
+      }
+     
+      
 
     };
 
@@ -281,9 +277,21 @@
         return;
       }
 
+
+      var commit = true;
+
+      if(updatedResource.commit !== undefined){
+          commit = updatedResource.commit;    
+       }
+
       if(updatedResource.browser !== undefined){
           resource.browser = updatedResource.browser;    
        }
+
+        if(updatedResource.resourceName !== undefined){
+          resource.resourceName = updatedResource.resourceName;    
+       }
+
       // if updatedResource send by part
       if(updatedResource.part !== undefined){
 
@@ -302,13 +310,10 @@
           }
 
           // update the resource
-          return resource.setContent(updatedResource.contents, true, function (status) {
+          return resource.setContent(updatedResource.contents, commit, function (status) {
             if (status.code === 'OK') {
-              this.logger.log('Resource update successful');
-              triggerReloadEvent(updatedResource);
-
-              delete resource.browser;
-
+              this.logger.log(updatedResource.resourceURL+' is up to date (commit '+commit+') ');
+              this.triggerReloadEvent(updatedResource);
             } else {
               this.logger.error(
                 'flo failed to update, this shouldn\'t happen please report it: ' +
@@ -348,14 +353,33 @@
     };
   }
 
-  function triggerReloadEvent(resource) {
+  Session.prototype.triggerReloadEvent = function(resource) {
+
     var data = {
       url: resource.resourceURL,
       contents: resource.contents
     };
 
+    this.logger.log('triggerReloadEvent', typeof resource.update);
+
+    if( typeof resource.resourceName == 'string'){
+
+       var script = '(function() {' +
+      'var time = new Date().getTime();'+
+      'console.log("[fb-flo] '+resource.resourceName+' has just been updated ["+ time +"] ");' +
+      '})()';
+
+       chrome.devtools.inspectedWindow.eval(script);
+
+    }
+
+    if(resource.browser !== undefined){
+      delete resource.browser;
+    }
+
     if ('string' === typeof resource.update) {
-      var updateFnStr = '(function() {' +
+
+     /* var updateFnStr = '(function() {' +
         'try {' +
           '(' + resource.update + ')(window, ' + JSON.stringify(resource.resourceURL) + ');' +
           '} catch(ex) {' +
@@ -364,16 +388,13 @@
           '}' +
         '})()';
         chrome.devtools.inspectedWindow.eval(updateFnStr);
+
+        */
     }
 
-    var script = '(function() {' +
-      'var event = new Event(\'fb-flo-reload\');' +
-      'event.data = ' + JSON.stringify(data) + ';' +
-      'window.dispatchEvent(event);' +
-      '})()';
+ 
 
-    chrome.devtools.inspectedWindow.eval(script);
-  }
+  };
 
   function indexOfMatcher(val, resourceURL) {
     return val.indexOf(resourceURL) > -1;
