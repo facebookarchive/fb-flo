@@ -229,28 +229,44 @@
    */
     Session.prototype.resourceUpdatedHandler = function(updatedResource,content) {
 
-   
-      if(this.devResources[updatedResource.url]!== undefined ){
-          
-      }else if(this.resources[updatedResource.url].browser !== undefined ){
 
-        this.logger.log('updating source file');
-      
-        this.conn.sendMessage({
-             action : 'update',
-             url : updatedResource.url,
-             content : content
-        });
+   this.logger.log(' updated');
 
+    if(this.devResources[updatedResource.url] !== undefined ){
+
+      if(this.devResources[updatedResource.url].sync !== undefined ){
+          this.logger.log(' synchro');
+           var record = {
+               action : 'sync',
+               url : this.devResources[updatedResource.url].sync
+          };
+
+          if(this.devResources[updatedResource.url].link !== undefined ){
+            this.logger.log(' link');
+            record.link = this.devResources[updatedResource.url].link;
+            delete this.devResources[updatedResource.url].link;
+          }
+
+          this.conn.sendMessage(record);
+          delete this.devResources[updatedResource.url].sync;
       }
+    }else if(this.resources[updatedResource.url] !== undefined ){
+      if(this.resources[updatedResource.url].resourceName === undefined ){
+          this.logger.log(' update');
+          this.conn.sendMessage({
+               action : 'update',
+               url : updatedResource.url,
+               content : content
+          });
+      }else{
 
-       var script = '(function() {' +
-          'console.log("[fb-flo] '+updatedResource.url+'  updating ...");' +
-          '})()';
+            this.logger.log('trigger');
+        this.triggerReloadEvent(updatedResource.url);
+        delete this.resources[updatedResource.url].resourceName;
+      }
+    }
 
-          chrome.devtools.inspectedWindow.eval(script);
-
-    };
+  };
 
   /**
    * Handler for messages from the server.
@@ -260,14 +276,24 @@
    */
 
   Session.prototype.messageHandler = function(updatedResource) {
-    if(updatedResource.action !==  undefined){
-      if(updatedResource.action == 'baseUrl' && this.conn && this.url){
-        this.conn.sendMessage({
+    if(updatedResource.action == 'baseUrl' && this.conn && this.url){
+          return this.conn.sendMessage({
              action : 'baseUrl',
              url : this.url
           });
-      } 
-    }else{
+      }else if(updatedResource.action == 'sync'){
+
+         this.logger.log('sync', updatedResource.resourceURL);
+
+        if(this.resources[updatedResource.resourceURL] !== undefined){
+          var resource = this.resources[updatedResource.resourceURL];
+        }
+
+        if(updatedResource.resourceName !== undefined){
+            resource.resourceName = updatedResource.resourceName;    
+        }
+      
+    }else if(updatedResource.action == 'update'){
 
       this.logger.log('push', updatedResource.resourceURL);
 
@@ -276,23 +302,27 @@
         return;
       }
 
-      if(this.resources[updatedResource.resourceURL] !== undefined){
-        var resource = this.resources[updatedResource.resourceURL];
-      }else if(this.devResources[updatedResource.resourceURL] !== undefined){
+      if(this.devResources[updatedResource.resourceURL] !== undefined){
         var resource = this.devResources[updatedResource.resourceURL];
-        resource.browser = true;
-      }else{
-        this.logger.error(
-          'Resource with the following URL is not on the page:',
-          updatedResource.resourceURL
-        );
-        return;
       }
 
-      if(updatedResource.resourceName !== undefined){
-          resource.resourceName = updatedResource.resourceName;    
+      if(updatedResource.sync !== undefined){
+          resource.sync = updatedResource.sync;    
       }
+      if(updatedResource.link !== undefined){
+          resource.link = updatedResource.link;    
+      }
+    }
 
+     if(resource === undefined){
+          this.logger.error(
+            'Resource with the following URL is not on the page:',
+            updatedResource.resourceURL
+          );
+          return;
+     }
+
+    
       // if updatedResource send by part
       if(updatedResource.part !== undefined){
 
@@ -312,10 +342,10 @@
 
           // update the resource
           return resource.setContent(updatedResource.contents, true, function (status) {
-            if (status.code === 'OK') {
-              this.logger.log(updatedResource.resourceURL+' is up to date (commit '+commit+') ');
-              this.triggerReloadEvent(updatedResource);
-            } else {
+
+            this.logger.log(status.code);
+               
+            if (status.code != 'OK') {
               this.logger.error(
                 'flo failed to update, this shouldn\'t happen please report it: ' +
                   JSON.stringify(status)
@@ -323,7 +353,7 @@
             }
           }.bind(this));
       }
-    }
+    
   };
 
   /**
@@ -354,26 +384,21 @@
     };
   }
 
-  Session.prototype.triggerReloadEvent = function(resource) {
-
-    var data = {
-      url: resource.resourceURL,
-      contents: resource.contents
-    };
+  Session.prototype.triggerReloadEvent = function(url) {
 
 
-    if( typeof resource.resourceName == 'string'){
+    if( typeof url == 'string'){
 
        var script = '(function() {' +
       'var time = new Date().getTime();'+
-      'console.log("[fb-flo] '+resource.resourceName+' has just been updated ["+ time +"] ");' +
+      'console.log("[fb-flo] '+url+' has just been updated ["+ time +"] ");' +
       '})()';
 
        chrome.devtools.inspectedWindow.eval(script);
 
     }
 
-    if ('string' === typeof resource.update) {
+  
 
      /* var updateFnStr = '(function() {' +
         'try {' +
@@ -386,8 +411,6 @@
         chrome.devtools.inspectedWindow.eval(updateFnStr);
 
         */
-    }
-
  
 
   };
