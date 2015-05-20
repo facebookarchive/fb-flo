@@ -229,42 +229,39 @@
    */
     Session.prototype.resourceUpdatedHandler = function(updatedResource,content) {
 
-
-   this.logger.log(' updated');
-
-    if(this.devResources[updatedResource.url] !== undefined ){
-
-      if(this.devResources[updatedResource.url].sync !== undefined ){
+     if(this.devResources[updatedResource.url] !== undefined ){
+        var resource = this.devResources[updatedResource.url];
+        if(resource.sync !== undefined ){
           this.logger.log(' synchro');
-           var record = {
+          var sync = resource.sync;
+          var record = {
                action : 'sync',
-               url : this.devResources[updatedResource.url].sync
+               url : sync
           };
-
-          if(this.devResources[updatedResource.url].link !== undefined ){
-            this.logger.log(' link');
-            record.link = this.devResources[updatedResource.url].link;
-            delete this.devResources[updatedResource.url].link;
-          }
-
           this.conn.sendMessage(record);
-          delete this.devResources[updatedResource.url].sync;
-      }
-    }else if(this.resources[updatedResource.url] !== undefined ){
-      if(this.resources[updatedResource.url].resourceName === undefined ){
-          this.logger.log(' update');
-          this.conn.sendMessage({
-               action : 'update',
-               url : updatedResource.url,
-               content : content
-          });
-      }else{
+          delete resource.sync;
+        }else if(resource.resourceName !== undefined ){
+          this.triggerReloadEvent(resource.resourceName);
+          delete resource.resourceName;
+        }
 
-            this.logger.log('trigger');
-        this.triggerReloadEvent(updatedResource.url);
-        delete this.resources[updatedResource.url].resourceName;
-      }
-    }
+     }else if(this.resources[updatedResource.url] !== undefined ){
+        var resource = this.resources[updatedResource.url];
+        if(resource.resourceName !== undefined ){
+          this.triggerReloadEvent(updatedResource.url);
+          delete resource.resourceName;
+        }else{
+          this.logger.log(' update');
+            this.conn.sendMessage({
+                 action : 'update',
+                 url : updatedResource.url,
+                 content : content
+            });
+        }
+        
+     }
+
+     
 
   };
 
@@ -276,6 +273,7 @@
    */
 
   Session.prototype.messageHandler = function(updatedResource) {
+   
     if(updatedResource.action == 'baseUrl' && this.conn && this.url){
           return this.conn.sendMessage({
              action : 'baseUrl',
@@ -283,21 +281,17 @@
           });
       }else if(updatedResource.action == 'sync'){
 
-         this.logger.log('sync', updatedResource.resourceURL);
-
+        this.logger.log('sync', updatedResource.resourceURL);
+        
         if(this.resources[updatedResource.resourceURL] !== undefined){
           var resource = this.resources[updatedResource.resourceURL];
-        }
-
-        if(updatedResource.resourceName !== undefined){
-            resource.resourceName = updatedResource.resourceName;    
         }
       
     }else if(updatedResource.action == 'update'){
 
       this.logger.log('push', updatedResource.resourceURL);
-
-      if (updatedResource.reload) {
+      
+      if (updatedResource.reload !== undefined) {
         chrome.devtools.inspectedWindow.reload();
         return;
       }
@@ -309,10 +303,12 @@
       if(updatedResource.sync !== undefined){
           resource.sync = updatedResource.sync;    
       }
-      if(updatedResource.link !== undefined){
-          resource.link = updatedResource.link;    
-      }
+
     }
+
+     if(updatedResource.resourceName !== undefined){
+          resource.resourceName = updatedResource.resourceName; 
+      }
 
      if(resource === undefined){
           this.logger.error(
@@ -340,18 +336,19 @@
               delete resource.part;
           }
 
+      
+              resource.setContent(updatedResource.contents, true, function (status) {
+                this.logger.log(status.code);
+                   
+                if (status.code != 'OK') {
+                  this.logger.error(
+                    'flo failed to update, this shouldn\'t happen please report it: ' +
+                      JSON.stringify(status)
+                  );
+                }
+              }.bind(this));
           // update the resource
-          return resource.setContent(updatedResource.contents, true, function (status) {
-
-            this.logger.log(status.code);
-               
-            if (status.code != 'OK') {
-              this.logger.error(
-                'flo failed to update, this shouldn\'t happen please report it: ' +
-                  JSON.stringify(status)
-              );
-            }
-          }.bind(this));
+          
       }
     
   };
@@ -383,6 +380,19 @@
       }
     };
   }
+
+
+  Session.prototype.console = function(title , data) {
+     var dataB64 = window.btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+     var data = decodeURIComponent(escape(window.atob(dataB64)));
+     var script = '(function() {' +
+        'var data = '+data+' ;'+
+        'console.log("[fb-flo] '+title+'",data);' +
+        '})()';
+    chrome.devtools.inspectedWindow.eval(script);
+
+  }
+
 
   Session.prototype.triggerReloadEvent = function(url) {
 
