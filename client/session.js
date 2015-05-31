@@ -124,7 +124,7 @@
     if(res.url.substr(0,4) !== 'data' ){
        var url = res.url.split('?')[0];
 
-        if(url.indexOf('/dev/')>0){
+        if(res.content.indexOf('sourceMappingURL')>0){
             this.devResources[url] = res;
         }else{
            this.resources[url] = res;
