@@ -78,6 +78,7 @@
     ws.onopen = this.openHandler;
     ws.onmessage = this.messageHandler;
     ws.onclose = this.closeHandler;
+    ws.onerror = this.errorHandler;
 
     this.ws = ws;
     return this;
@@ -180,6 +181,40 @@
     this.callbacks.message(msg);
   };
 
+
+  /**
+   * Error handler.
+   *
+   * @param {object} evt
+   * @private
+   */
+   Connection.prototype.errorHandler = function(err) {
+     this.logger.log('error :',JSON.stringify(err));
+   };
+
+  /**
+   * Convert utf8 string to base64 string
+   *
+   * @param {object} evt
+   * @private
+   */
+   Connection.prototype.utf8ToB64  = function ( str ) {
+      return window.btoa(unescape(encodeURIComponent( str )));
+   };
+
+  /**
+   * Send Message to flo Server
+   *
+   * @param {object} evt
+   * @private
+   */
+
+  Connection.prototype.sendMessage = function(message,callback) {
+    this.ws.send(this.utf8ToB64(JSON.stringify(message)));
+    if(callback){
+      callback();
+    }
+  };
 
   /**
    * Open handler.

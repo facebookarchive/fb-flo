@@ -168,7 +168,11 @@
     }
   });
 
-  $('.action.retry').onclick = function() {
+  $('.clear-log').onclick = function() {
+    $('.log-box').innerHTML = '';
+  };
+
+   $('.action.retry').onclick = function() {
     triggerEvent('retry');
   };
 

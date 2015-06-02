@@ -153,6 +153,17 @@ h1 {
   padding: 15px 0 10px;
 }
 
+button {
+  color: rgb(110, 116, 128);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: normal;
+  margin-top: 0;
+  width :100px;
+  padding: 15px 0 10px;
+}
+
+
 .desc {
   color: #808080;
   padding: 0;
