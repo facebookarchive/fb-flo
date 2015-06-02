@@ -39,7 +39,6 @@
     this.status = status;
     this.createLogger = createLogger;
     this.logger = createLogger('session');
-    this.resources = [];
     this.devResources = [];
     this.url = null;
     this.conn = null;
@@ -56,7 +55,7 @@
 
   Session.prototype.start = function() {
     this.logger.log('Starting flo for host', this.host);
-    this.getResources(this.connect.bind(this, this.started));
+    this.getLocation(this.setLocation);
   };
 
   /**
@@ -121,15 +120,43 @@
 
   Session.prototype.registerResource = function(res) {
     // exclude ressource that are data
-    if(res.url.substr(0,4) !== 'data' ){
+    if(res.url.substr(0,4) !== 'data' && res.type !== "document" ){
        var url = res.url.split('?')[0];
-
-        if(res.content.indexOf('sourceMappingURL')>0){
-            this.devResources[url] = res;
-        }else{
-           this.resources[url] = res;
-        }
+       if(url !== ''){
+          this.devResources[url] = res;
+       }  
      }
+  };
+
+ /**
+   * save the url location then start getting resources.
+   *
+   * @param {function} callback
+   * @private
+   */
+
+  Session.prototype.setLocation = function(url) {
+    if(url){
+      this.url = url;
+      this.getResources(this.connect.bind(this, this.started));
+    }else{
+      this.logger.log('erorr on location');
+    }
+  };
+
+
+  /**
+   * Get the url location of the inspected window.
+   *
+   * @param {function} callback
+   * @private
+   */
+
+  Session.prototype.getLocation = function(callback) {
+    chrome.devtools.inspectedWindow['eval'](
+      'location.origin+location.pathname',
+      callback.bind(this)
+    );
   };
 
   /**
@@ -140,28 +167,29 @@
    */
 
   Session.prototype.getResources = function(callback) {
-    var self = this;
+
     chrome.devtools.inspectedWindow.getResources(function (resources) {
 
-      self.url = resources[0].url;
-
       resources.forEach(function(res){
-          self.registerResource(res);
-      });
+         this.registerResource(res);
+      }.bind(this));
 
-      
+
+         
       // After we register the current resources, we listen to the
       // onResourceAdded event to push on more resources lazily fetched
       // to our array.
-      self.listen(
+      this.listen(
         chrome.devtools.inspectedWindow,
         'onResourceAdded',
         function (res) {
-          self.registerResource(res);
-        }
+          this.registerResource(res);
+        }.bind(this)
       );
+
+      this.console(' ','Ready !');
       callback();
-    });
+    }.bind(this));
   };
 
   /**
@@ -172,6 +200,7 @@
    */
 
   Session.prototype.connect = function(callback) {
+
     callback = once(callback);
     var self = this;
     this.conn = new Connection(this.host, this.port, this.createLogger)
@@ -190,6 +219,7 @@
         self.status('connecting');
       })
       .connect();
+    
   };
 
   /**
@@ -208,6 +238,7 @@
            url : this.url
         });
     }
+    
     this.listen(
       chrome.devtools.network,
       'onNavigated',
@@ -229,7 +260,7 @@
    */
     Session.prototype.resourceUpdatedHandler = function(updatedResource,content) {
 
-     if(this.devResources[updatedResource.url] !== undefined ){
+     if(this.devResources[updatedResource.url] !== undefined  && content.indexOf('sourceMappingURL')>1 ){
         var resource = this.devResources[updatedResource.url];
         if(resource.sync !== undefined ){
           this.logger.log(' synchro');
@@ -245,8 +276,9 @@
           delete resource.resourceName;
         }
 
-     }else if(this.resources[updatedResource.url] !== undefined ){
-        var resource = this.resources[updatedResource.url];
+     }else if(this.devResources[updatedResource.url] !== undefined ){
+
+        var resource = this.devResources[updatedResource.url];
         if(resource.resourceName !== undefined ){
           this.triggerReloadEvent(updatedResource.url);
           delete resource.resourceName;
@@ -283,8 +315,8 @@
 
         this.logger.log('sync', updatedResource.resourceURL);
         
-        if(this.resources[updatedResource.resourceURL] !== undefined){
-          var resource = this.resources[updatedResource.resourceURL];
+        if(this.devResources[updatedResource.resourceURL] !== undefined){
+          var resource = this.devResources[updatedResource.resourceURL];
         }
       
     }else if(updatedResource.action == 'update'){
@@ -295,6 +327,14 @@
         chrome.devtools.inspectedWindow.reload();
         return;
       }
+
+      if(this.devResources[updatedResource.resourceURL] == undefined){
+          if(this.devResources[updatedResource.resourceURL] !== undefined){
+            this.devResources[updatedResource.resourceURL] = this.devResources[updatedResource.resourceURL];
+            delete this.devResources[updatedResource.resourceURL];
+          }
+       }
+
 
       if(this.devResources[updatedResource.resourceURL] !== undefined){
         var resource = this.devResources[updatedResource.resourceURL];
@@ -331,13 +371,13 @@
       }else {
           // concat all parts
           if (resource.part !== undefined){
-              resource.part.push(updatedResource.contents);
-              updatedResource.contents = resource.part.join('');
+              resource.part.push(updatedResource.content);
+              updatedResource.content = resource.part.join('');
               delete resource.part;
           }
 
       
-              resource.setContent(updatedResource.contents, true, function (status) {
+              resource.setContent(updatedResource.content, true, function (status) {
                 this.logger.log(status.code);
                    
                 if (status.code != 'OK') {
@@ -424,13 +464,5 @@
  
 
   };
-
-  function indexOfMatcher(val, resourceURL) {
-    return val.indexOf(resourceURL) > -1;
-  }
-
-  function equalMatcher(val, resourceURL) {
-    return resourceURL === val;
-  }
 
 }).call(this);
