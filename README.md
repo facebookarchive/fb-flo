@@ -132,7 +132,7 @@ function resolver(filepath, callback) {
     });
 }
 ```
-You can watch multiple dir too :
+You can watch multiple folders too :
 
 ```js
 var server = flo(['./lib/', './sass/'], {
