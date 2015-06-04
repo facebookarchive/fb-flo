@@ -132,3 +132,12 @@ function resolver(filepath, callback) {
     });
 }
 ```
+You can watch multiple dir too :
+
+```js
+var server = flo(['./lib/, './sass/'], {
+  port: 8888,
+  dir: './lib/',
+  glob: ['./lib/**/*.js', './lib/**/*.css']
+}, resolver);
+```
