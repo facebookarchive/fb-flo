@@ -63,6 +63,7 @@ var server = flo(
     * `useFilePolling` some platforms that do not support native file watching, you can force the file watcher to work in polling mode.
     * `pollingInterval` if in polling mode (useFilePolling) then you can set the interval (in milliseconds) at which to poll for file changes.
     * `watchDotFiles` dot files are not watched by default.
+    * `disableWatcher` set to true to disable starting a watcher (if you want to integrate with your own watcher)
 * `resolver` a function to map between files and resources.
 
 The resolver callback is called with two arguments:
